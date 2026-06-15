@@ -1,0 +1,225 @@
+# GlassBench CI — the real gate (replaces the old score.yml stub).
+#
+# Requires a packaging file (pyproject.toml) at the repo root so `pip install .`
+# works — that is provided by the packaging task. numpy is the only runtime
+# dependency of the scorer; pytest is the only extra we install here for tests.
+#
+# What this workflow enforces on every push / PR:
+#   1. fetch oracle    — download the LongMemEval source if a URL secret is set (runs
+#                         BEFORE tests so the source-derived tests + determinism gate
+#                         can use it; absent source => those simply skip).
+#   2. test            — install the package from pyproject and run the test suite.
+#   3. determinism gate — rebuild data/glassbench_v0.1.jsonl from the public
+#                         LongMemEval oracle and assert it is BYTE-IDENTICAL to the
+#                         committed file (the frozen-data contract).
+#   4. leaderboard gate — regenerate the leaderboard and assert it matches the
+#                         committed LEADERBOARD.md.
+#   5. submission scoring (PRs only) — when a PR adds/changes a
+#                         submissions/<name>/predictions.json, validate + score it
+#                         with the frozen scorer and print its leaderboard row.
+#
+# Notes on the oracle-dependent steps:
+#   * The LongMemEval oracle source (data/longmemeval_oracle.json, ~15 MB) is
+#     .gitignored and not redistributed here, so CI can only rebuild the data when
+#     the source is available. The fetch step runs FIRST; provide the source via the
+#     LONGMEMEVAL_ORACLE_URL repo secret (a direct download URL) to make the
+#     determinism gate fail-closed and to exercise the source-derived integrity
+#     tests. If no source is reachable, those tests SKIP and the determinism gate
+#     prints a clear ::warning:: and skips the byte-comparison rather than producing
+#     a false red check — but whenever the source IS present, a non-identical rebuild
+#     FAILS the build.
+#   * The leaderboard gate runs the repo's leaderboard generator if one exists
+#     (`scripts/make_leaderboard.py` or `python -m glassbench.leaderboard`). If the
+#     repo ships no generator yet, it warns and skips. When a generator exists, a
+#     drift from the committed LEADERBOARD.md FAILS the build.
+
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+# Read-only: this workflow never pushes. (A future "post results to the PR" job
+# would request `pull-requests: write` here.)
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: test + determinism + leaderboard
+    runs-on: ubuntu-latest
+    env:
+      # Optional: a direct-download URL for the LongMemEval oracle JSON. Set it as
+      # a repo secret to make the determinism gate fail-closed in CI.
+      LONGMEMEVAL_ORACLE_URL: ${{ secrets.LONGMEMEVAL_ORACLE_URL }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          # Full history so PR steps can diff the changed submissions against base.
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install the package (pyproject) + test deps
+        run: |
+          python -m pip install --upgrade pip
+          # Installs glassbench and its declared deps (numpy) from pyproject.toml.
+          pip install .
+          # pytest is the only thing the tests need beyond the package itself.
+          pip install pytest
+
+      # Fetch the oracle BEFORE running tests so the source-derived integrity tests and
+      # the determinism gate can both use it when a URL is configured. On a fresh clone
+      # with no secret the source is simply absent; the source-derived tests then SKIP
+      # (not fail), so the test step is green regardless.
+      - name: Fetch LongMemEval oracle source (if a URL is configured)
+        id: oracle
+        run: |
+          set -euo pipefail
+          src="data/longmemeval_oracle.json"
+          if [ -f "$src" ]; then
+            echo "Oracle source already present in the checkout."
+            echo "have_source=true" >> "$GITHUB_OUTPUT"
+          elif [ -n "${LONGMEMEVAL_ORACLE_URL:-}" ]; then
+            echo "Downloading oracle source from LONGMEMEVAL_ORACLE_URL ..."
+            mkdir -p data
+            curl -fsSL "$LONGMEMEVAL_ORACLE_URL" -o "$src"
+            echo "have_source=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::No oracle source and no LONGMEMEVAL_ORACLE_URL secret — the source-derived integrity tests and the data rebuild will be skipped this run (the schema/metric tests still run). Set the secret to exercise them and make the determinism gate fail-closed."
+            echo "have_source=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run tests
+        run: |
+          python -m pytest -q
+
+      - name: Determinism gate — rebuild data, assert byte-identical
+        if: steps.oracle.outputs.have_source == 'true'
+        run: |
+          set -euo pipefail
+          committed="data/glassbench_v0.1.jsonl"
+          if [ ! -f "$committed" ]; then
+            echo "::error::Committed data file $committed is missing."
+            exit 1
+          fi
+          # Snapshot the committed file, rebuild in place, and compare.
+          cp "$committed" /tmp/glassbench_committed.jsonl
+          python -m glassbench.build_data
+          if cmp -s "$committed" /tmp/glassbench_committed.jsonl; then
+            echo "Determinism gate PASSED: rebuilt data is byte-identical to the committed file."
+          else
+            echo "::error::Rebuilt data/glassbench_v0.1.jsonl differs from the committed file. The data is FROZEN (v0.1) — the builder must reproduce it byte-for-byte."
+            diff <(head -c 4000 /tmp/glassbench_committed.jsonl) <(head -c 4000 "$committed") || true
+            exit 1
+          fi
+          # Restore the committed bytes so later steps see the pristine tree.
+          cp /tmp/glassbench_committed.jsonl "$committed"
+
+      - name: Leaderboard gate — regenerate and assert it matches the committed file
+        run: |
+          set -euo pipefail
+          committed="LEADERBOARD.md"
+          if [ ! -f "$committed" ]; then
+            echo "::error::Committed $committed is missing."
+            exit 1
+          fi
+          # Locate the repo's leaderboard generator. The scorer is frozen; the
+          # generator just re-scores the committed submissions and renders the table,
+          # and reproduces the committed LEADERBOARD.md byte-for-byte. It exposes a
+          # --check mode that asserts byte-stability and exits non-zero on drift,
+          # which is exactly the CI gate. If no generator is shipped, warn and skip
+          # rather than produce a false red.
+          gen=""
+          for cand in scripts/gen_leaderboard.py scripts/make_leaderboard.py; do
+            if [ -f "$cand" ]; then gen="python $cand"; break; fi
+          done
+          if [ -z "$gen" ] && python -c "import importlib.util,sys; sys.exit(0 if importlib.util.find_spec('glassbench.leaderboard') else 1)"; then
+            gen="python -m glassbench.leaderboard"
+          fi
+          if [ -z "$gen" ]; then
+            echo "::warning::No leaderboard generator found (scripts/gen_leaderboard.py, scripts/make_leaderboard.py, or glassbench.leaderboard) — skipping the leaderboard gate. Add a generator to enforce it."
+            exit 0
+          fi
+          echo "Using leaderboard generator: $gen"
+          # Prefer the generator's own --check (writes nothing, fails on drift).
+          if $gen --help 2>/dev/null | grep -q -- "--check"; then
+            $gen --check
+            echo "Leaderboard gate PASSED: --check confirms the committed LEADERBOARD.md is byte-stable."
+          else
+            # Fallback: snapshot, regenerate in place, compare, restore.
+            cp "$committed" /tmp/leaderboard_committed.md
+            $gen
+            if cmp -s "$committed" /tmp/leaderboard_committed.md; then
+              echo "Leaderboard gate PASSED: regenerated LEADERBOARD.md matches the committed file."
+            else
+              echo "::error::Regenerated LEADERBOARD.md differs from the committed file. Re-run the generator and commit the result."
+              diff "$committed" /tmp/leaderboard_committed.md || true
+              cp /tmp/leaderboard_committed.md "$committed"
+              exit 1
+            fi
+            cp /tmp/leaderboard_committed.md "$committed"
+          fi
+
+      - name: Find changed submissions (PRs only)
+        id: changed
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          base="origin/${{ github.base_ref }}"
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}" || true
+          # predictions.json files added or modified by this PR.
+          files="$(git diff --name-only --diff-filter=AM "$base"...HEAD -- 'submissions/*/predictions.json' || true)"
+          if [ -z "$files" ]; then
+            echo "No changed submissions/*/predictions.json in this PR."
+          else
+            echo "Changed submissions:"
+            echo "$files"
+          fi
+          {
+            echo "files<<EOF"
+            echo "$files"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Validate + score changed submissions and print their rows
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          files="${{ steps.changed.outputs.files }}"
+          # Treat an all-whitespace value as empty.
+          if [ -z "${files//[$'\n\r\t ']/}" ]; then
+            echo "Nothing to score."
+            exit 0
+          fi
+          status=0
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            echo "::group::Scoring $f"
+            if [ ! -f "$f" ]; then
+              echo "::error::$f was listed as changed but does not exist."
+              status=1
+              echo "::endgroup::"
+              continue
+            fi
+            # The scorer loads + validates the predictions (shape, ids, confidence
+            # range) and prints the full table including the Glass row; a malformed
+            # submission makes it exit non-zero, which fails this step.
+            if python -m glassbench.score --predictions "$f"; then
+              :
+            else
+              echo "::error::Scoring/validation failed for $f"
+              status=1
+            fi
+            echo "::endgroup::"
+          done <<< "$files"
+          exit "$status"

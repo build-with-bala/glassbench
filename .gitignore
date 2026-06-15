@@ -1,0 +1,9 @@
+data/longmemeval_oracle.json
+__pycache__/
+*.pyc
+.venv/
+# Python build / packaging artifacts (e.g. from `pip install -e ".[dev]"`).
+*.egg-info/
+build/
+dist/
+.pytest_cache/

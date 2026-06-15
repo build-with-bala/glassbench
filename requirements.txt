@@ -1,0 +1,11 @@
+# GlassBench runtime requirements.
+#
+# numpy is the ONLY runtime dependency of the scorer (ECE / Brier / AURC math).
+# Everything else GlassBench uses is the Python standard library.
+#
+# For an editable/dev install (package + console script + pytest) prefer:
+#     pip install -e ".[dev]"
+# which reads dependencies from pyproject.toml. This file is kept for environments
+# (e.g. CI, `pip install -r requirements.txt`) that want a plain requirements list.
+
+numpy>=1.21

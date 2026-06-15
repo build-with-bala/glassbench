@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "glassbench"
+version = "0.1.0"
+description = "A memory benchmark that measures whether a system knows when it doesn't know."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+keywords = ["benchmark", "memory", "calibration", "abstention", "llm", "longmemeval"]
+authors = [{ name = "GlassBench authors" }]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# numpy is the ONLY runtime dependency (ECE / Brier / AURC math in score.py / calib.py).
+# Everything else the scorer uses is the Python standard library.
+dependencies = ["numpy>=1.21"]
+
+[project.optional-dependencies]
+# Tools for developing/maintaining the benchmark (not needed to run the scorer).
+dev = ["pytest>=7"]
+
+[project.urls]
+Homepage = "https://github.com/glassbench/glassbench"
+Source = "https://github.com/glassbench/glassbench"
+
+[project.scripts]
+# Console entry point for the frozen scorer: `glassbench-score --predictions ...`
+glassbench-score = "glassbench.score:main"
+
+[tool.setuptools]
+# Ship only the importable package. The data file, baselines, submissions and tests
+# are part of the repo (and the frozen contract) but are not installed as package data;
+# they are read via filesystem paths and live alongside a git checkout.
+packages = ["glassbench"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

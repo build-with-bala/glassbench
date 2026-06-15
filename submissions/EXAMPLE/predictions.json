@@ -1,0 +1,6 @@
+[
+  {"id": "example_answerable_0001", "answer": "Seattle", "confidence": 0.91},
+  {"id": "example_stale_0002", "answer": "a 2019 Toyota Corolla", "confidence": 0.42},
+  {"id": "example_contradiction_0003", "abstain": true},
+  {"id": "example_false_premise_0004", "abstain": true}
+]
