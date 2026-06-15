@@ -1,0 +1,482 @@
+[
+  {
+    "id": "gb-answerable-01493427",
+    "answer": "Speaking of which, I just realized I've added 25 new postcards to my collection since I started collecting again.",
+    "confidence": 0.4606679293257472
+  },
+  {
+    "id": "gb-answerable-06db6396",
+    "answer": "Since I've completed 4 projects since starting painting classes, I feel more confident in my skills.",
+    "confidence": 0.430465935330972
+  },
+  {
+    "id": "gb-answerable-08e075c7",
+    "answer": "By the way, speaking of tracking my health, I just realized I've been using my Fitbit Charge 3 for 9 months now - it's crazy how time flies!",
+    "confidence": 0.3093076228776489
+  },
+  {
+    "id": "gb-answerable-0977f2af",
+    "answer": "I'm actually thinking of using the Air Fryer I got yesterday to make some crispy sweet potato fries to go with the meals.",
+    "confidence": 0.9114708916054773
+  },
+  {
+    "id": "gb-answerable-0e4e4c46",
+    "answer": "By the way, speaking of building and creating things, I just got my highest score in Ticket to Ride - 132 points!",
+    "confidence": 0.30486185515609376
+  },
+  {
+    "id": "gb-answerable-0f05491a",
+    "answer": "I actually forgot to ask, how many stars do I need to reach the gold level on my Starbucks Rewards app?",
+    "confidence": 0.6600724991191458
+  },
+  {
+    "id": "gb-answerable-184da446",
+    "answer": "By the way, I just finished reading about the discovery of DNA structure in \"A Short History of Nearly Everything\" - I'm now on page 220, and it's amazing how much I've learned so far!",
+    "confidence": 0.5808969975656848
+  },
+  {
+    "id": "gb-answerable-18bc8abd",
+    "answer": "By the way, I've been loving my new Weber gas grill for quick weeknight dinners, and I'm currently obsessed with Kansas City Masterpiece BBQ sauce on my ribs.",
+    "confidence": 0.28642120894178813
+  },
+  {
+    "id": "gb-answerable-1cea1afa",
+    "answer": "Do you have any tips on how to promote my Q&A session to get more followers to participate?",
+    "confidence": 0.06903689590363649
+  },
+  {
+    "id": "gb-answerable-2133c1b5",
+    "answer": "I'm still getting used to living in Tokyo, but I've been enjoying the independence of my new studio apartment in Harajuku - it's been a month now, and the commute to work is really convenient.",
+    "confidence": 0.3858051769410227
+  },
+  {
+    "id": "gb-answerable-2698e78f",
+    "answer": "And by the way, speaking of boundaries, I see Dr.",
+    "confidence": 0.29035817705942235
+  },
+  {
+    "id": "gb-answerable-26bdc477",
+    "answer": "Do you know if it's compatible with my Canon EOS 80D camera?",
+    "confidence": 0.9208786833288995
+  },
+  {
+    "id": "gb-answerable-3ba21379",
+    "answer": "I was wondering, what are some good Vallejo colors for creating a realistic metallic finish on my model's wheels?",
+    "confidence": 0.5802985996319876
+  },
+  {
+    "id": "gb-answerable-45dc21b6",
+    "answer": "By the way, I've tried out 3 of Emma's recipes so far, and they're all amazing!",
+    "confidence": 0.8231485695490993
+  },
+  {
+    "id": "gb-answerable-4b24c848",
+    "answer": "By the way, I've already got five tops from H&M so far, and I'm thinking of getting a few more.",
+    "confidence": 0.6458266504339872
+  },
+  {
+    "id": "gb-answerable-4d6b87c8",
+    "answer": "I've got a lot of titles on my to-watch list, currently 25, and I'm always looking to add more.",
+    "confidence": 0.09294664147498233
+  },
+  {
+    "id": "gb-answerable-5831f84d",
+    "answer": "By the way, I've been on a learning streak lately, having watched 15 Crash Course videos in the past few weeks.",
+    "confidence": 0.9656722094004833
+  },
+  {
+    "id": "gb-answerable-59524333",
+    "answer": "I usually go to the gym on Mondays, Wednesdays, and Fridays, so I'd prefer to avoid scheduling the meeting during those times.",
+    "confidence": 0.19997900970961446
+  },
+  {
+    "id": "gb-answerable-603deb26",
+    "answer": "By the way, speaking of gin, I've tried making a Negroni at home 10 times now since my friend Emma showed me how to make it.",
+    "confidence": 0.8015600153148095
+  },
+  {
+    "id": "gb-answerable-618f13b2",
+    "answer": "And, I'm happy to report that I've worn my new black Converse Chuck Taylor All Star sneakers four times already, including to my friend's birthday party last Saturday.",
+    "confidence": 0.6850360180776163
+  },
+  {
+    "id": "gb-answerable-6a27ffc2",
+    "answer": "By the way, I've been brushing up on my Python skills by watching Corey Schafer's Python programming series on YouTube, and I've completed 20 videos so far.",
+    "confidence": 0.6656841249083991
+  },
+  {
+    "id": "gb-answerable-6aeb4375",
+    "answer": "By the way, have you tried any good Korean restaurants in my city lately?",
+    "confidence": 0.372400612169721
+  },
+  {
+    "id": "gb-answerable-71315a70",
+    "answer": "I've already spent 10-12 hours on my abstract ocean sculpture, and I'm excited to explore new techniques and materials for my next piece.",
+    "confidence": 0.368487544013671
+  },
+  {
+    "id": "gb-answerable-72e3ee87",
+    "answer": "By the way, I've been watching Crash Course's Science series, and I just completed 50 episodes - it's been really helpful in understanding the basics of science.",
+    "confidence": 0.9724638310035777
+  },
+  {
+    "id": "gb-answerable-7401057b",
+    "answer": "Can you help me understand how many free night's stays I can redeem at any Hilton property with my accumulated points?",
+    "confidence": 0.5655049957487203
+  },
+  {
+    "id": "gb-answerable-7a87bd0c",
+    "answer": "By the way, I've been sticking to my daily tidying routine for 4 weeks now, and it's amazing how much of a difference it's made in my apartment.",
+    "confidence": 0.9561768709936705
+  },
+  {
+    "id": "gb-answerable-7e974930",
+    "answer": "By the way, speaking of recent sales, I earned $420 at the Downtown Farmers Market on my most recent visit.",
+    "confidence": 0.2905166387528376
+  },
+  {
+    "id": "gb-answerable-830ce83f",
+    "answer": "I'll ask Rachel about her neighborhood and favorite spots in the city.",
+    "confidence": 0.32685147279336413
+  },
+  {
+    "id": "gb-answerable-852ce960",
+    "answer": "I'm actually buying a $325,000 house, and I got pre-approved for $350,000 from Wells Fargo.",
+    "confidence": 0.370084799087223
+  },
+  {
+    "id": "gb-answerable-89941a93",
+    "answer": "By the way, I currently have three bikes, and I'm wondering if that's too many.",
+    "confidence": 0.996801463640957
+  },
+  {
+    "id": "gb-answerable-9ea5eabc",
+    "answer": "I think I will definitely try to plan some solo excursions on my next family trip.",
+    "confidence": 0.36458046517117304
+  },
+  {
+    "id": "gb-answerable-a2f3aa27",
+    "answer": "And by the way, I've got 1250 followers on Instagram now, so it'd be great to get some insights on how to optimize my content for them.",
+    "confidence": 0.5608301613453914
+  },
+  {
+    "id": "gb-answerable-affe2881",
+    "answer": "By the way, speaking of bird identification, I've been keeping track of the species I've seen in my local park, and I've managed to spot 27 different species so far.",
+    "confidence": 0.3390911063880716
+  },
+  {
+    "id": "gb-answerable-b6019101",
+    "answer": "By the way, I've been on a roll with movies lately - I've watched 12 films in the last 3 months, including 5 MCU films, which is a lot for me!",
+    "confidence": 0.7333297439726892
+  },
+  {
+    "id": "gb-answerable-c7dc5443",
+    "answer": "By the way, I'm feeling pretty confident about my athletic abilities lately, our volleyball team, the Net Ninjas, is doing well with a 5-2 record.",
+    "confidence": 0.1788045105299486
+  },
+  {
+    "id": "gb-answerable-cc5ded98",
+    "answer": "I've been dedicating about an hour each day to coding exercises, which has been helpful in making progress.",
+    "confidence": 0.5404701787343249
+  },
+  {
+    "id": "gb-answerable-ce6d2d27",
+    "answer": "Speaking of cocktails, I have a cocktail-making class on Friday, and I'm thinking of experimenting with some new recipes.",
+    "confidence": 0.8069958075390531
+  },
+  {
+    "id": "gb-answerable-cf22b7bf",
+    "answer": "By the way, speaking of my cardio days, I've been doing great and I just realized I've lost 10 pounds since I started going consistently to the gym 3 months ago.",
+    "confidence": 0.22182756012352522
+  },
+  {
+    "id": "gb-answerable-db467c8c",
+    "answer": "By the way, my parents have been a huge help in preparing all the paperwork, they've been staying with me for nine months now.",
+    "confidence": 0.5604692683105018
+  },
+  {
+    "id": "gb-answerable-e493bb7c",
+    "answer": "By the way, speaking of my bedroom, I recently moved the \"Ethereal Dreams\" painting by Emma Taylor above my bed, and it adds a nice touch to the space.",
+    "confidence": 0.38511706224505937
+  },
+  {
+    "id": "gb-answerable-e61a7584",
+    "answer": "I've had my cat, Luna, for about 9 months now, and I've been trying to keep her active and engaged.",
+    "confidence": 0.2954576803996586
+  },
+  {
+    "id": "gb-answerable-ed4ddc30",
+    "answer": "And by the way, I need to start using up some of our eggs, we have a lot stocked up in the fridge - 30 dozen at the moment!",
+    "confidence": 0.8888483882858785
+  },
+  {
+    "id": "gb-answerable-f9e8c073",
+    "answer": "I did attend three sessions of the bereavement support group, and it really helped me process my emotions.",
+    "confidence": 0.12509275308583923
+  },
+  {
+    "id": "gb-stale-07741c44",
+    "answer": "By the way, do you have any tips on how to keep the sneakers clean and fresh while they're stored?",
+    "confidence": 0.5762855177392414
+  },
+  {
+    "id": "gb-stale-0ddfec37",
+    "answer": "By the way, I just got back from a weekend trip and had some time to organize my collection - I've added 20 autographed baseballs to my collection in the past few months, which is crazy!",
+    "confidence": 0.48256780779742514
+  },
+  {
+    "id": "gb-stale-10e09553",
+    "answer": "Oh, and by the way, I caught 7 largemouth bass on my trip to Lake Michigan with Alex on 7/10 - that was a great day!",
+    "confidence": 0.0981333274526548
+  },
+  {
+    "id": "gb-stale-50635ada",
+    "answer": "Can you tell me what my current frequent flyer status is on United Airlines?",
+    "confidence": 0.44454488257745506
+  },
+  {
+    "id": "gb-stale-5a4f22c0",
+    "answer": "By the way, speaking of networking, I was just thinking about catching up with Rachel, an old colleague from my previous company, who's currently at TechCorp.",
+    "confidence": 0.9914324529807107
+  },
+  {
+    "id": "gb-stale-89941a94",
+    "answer": "And by the way, I've been using it along with my other two bikes, a mountain bike and a commuter bike.",
+    "confidence": 0.4760116605362331
+  },
+  {
+    "id": "gb-stale-9bbe84a2",
+    "answer": "Speaking of which, my current goal is to reach level 150, and I'm determined to get there eventually.",
+    "confidence": 0.8576092120893067
+  },
+  {
+    "id": "gb-stale-c4ea545c",
+    "answer": "I go to the gym on Tuesdays, Thursdays, and Saturdays.",
+    "confidence": 0.9362034567810752
+  },
+  {
+    "id": "gb-stale-dfde3500",
+    "answer": "Can you remind me what day I have my language exchange class with Juan?",
+    "confidence": 0.3510594577070135
+  },
+  {
+    "id": "gb-stale-e66b632c",
+    "answer": "Oh, and by the way, I just got back from a charity 5K run last weekend and was happy to beat my personal best time - shaved off about a minute and a half from my previous record!",
+    "confidence": 0.4064044719777097
+  },
+  {
+    "id": "gb-stale-f685340e",
+    "answer": "Yeah, I'm planning to play tennis with my friends this Sunday at the local park.",
+    "confidence": 0.05058013227260205
+  },
+  {
+    "id": "gb-contradiction-07741c44",
+    "answer": "Forget what I said about my old sneakers being under the bed — I actually threw them out, so I don't keep them anywhere now.",
+    "confidence": 0.4774664651660335
+  },
+  {
+    "id": "gb-contradiction-2698e78f",
+    "answer": "Do you have any tips on how to handle potential pushback or resistance from my partner?",
+    "confidence": 0.23874369219306613
+  },
+  {
+    "id": "gb-contradiction-50635ada",
+    "answer": "Can you tell me what my current frequent flyer status is on United Airlines?",
+    "confidence": 0.1055232999991339
+  },
+  {
+    "id": "gb-contradiction-603deb26",
+    "answer": "I've tried making it at home for 5 times now since Emma teached me how to make it, and I'm getting closer to getting it just right.",
+    "confidence": 0.25690769055109275
+  },
+  {
+    "id": "gb-contradiction-6071bd76",
+    "answer": "By the way, I've been experimenting with my French press and I've found that 1 tablespoon of coffee for every 6 ounces of water is the perfect ratio for me.",
+    "confidence": 0.4826515052646685
+  },
+  {
+    "id": "gb-contradiction-6aeb4375",
+    "answer": "Actually, I misspoke earlier about trying Korean restaurants in my city — I was thinking of a trip elsewhere.",
+    "confidence": 0.9185565126851866
+  },
+  {
+    "id": "gb-contradiction-852ce960",
+    "answer": "I'm actually buying a $325,000 house, and I got pre-approved for $350,000 from Wells Fargo.",
+    "confidence": 0.6873814109674163
+  },
+  {
+    "id": "gb-contradiction-89941a94",
+    "answer": "By the way, I currently have three bikes, and I'm wondering if that's too many.",
+    "confidence": 0.31162457258040965
+  },
+  {
+    "id": "gb-contradiction-945e3d21",
+    "answer": "Scratch the yoga thing I mentioned — I actually quit going to yoga entirely, so I don't attend any classes now.",
+    "confidence": 0.4815128773625196
+  },
+  {
+    "id": "gb-contradiction-9bbe84a2",
+    "answer": "Speaking of which, do you have any tips for improving my aim in Apex Legends?",
+    "confidence": 0.21332013744244616
+  },
+  {
+    "id": "gb-contradiction-dfde3500",
+    "answer": "Can you remind me what day I have my language exchange class with Juan?",
+    "confidence": 0.06736526307497659
+  },
+  {
+    "id": "gb-contradiction-e66b632c",
+    "answer": "Actually, scratch what I said about my charity 5K personal best — I checked my running log and I was confusing it with someone else's race.",
+    "confidence": 0.4118200028096983
+  },
+  {
+    "id": "gb-false_premise-031748ae_abs",
+    "answer": "By the way, how many engineers do I lead in my new role as Senior Software Engineer?",
+    "confidence": 0.6554388205185444
+  },
+  {
+    "id": "gb-false_premise-0862e8bf_abs",
+    "answer": "By the way, my cat's name is Luna, and she's been such a sweetie throughout all the changes we've been making to her environment.",
+    "confidence": 0.5190786525967415
+  },
+  {
+    "id": "gb-false_premise-09ba9854_abs",
+    "answer": "Can you just tell me how to get to my hotel from the airport by train then?",
+    "confidence": 0.349456184408902
+  },
+  {
+    "id": "gb-false_premise-0ddfec37_abs",
+    "answer": "By the way, I just got back from a weekend trip and had some time to organize my collection - I've added 20 autographed baseballs to my collection in the past few months, which is crazy!",
+    "confidence": 0.41479927439113606
+  },
+  {
+    "id": "gb-false_premise-15745da0_abs",
+    "answer": "I've been collecting vintage cameras for three months now, and I've already amassed a pretty impressive collection.",
+    "confidence": 0.9788745411581371
+  },
+  {
+    "id": "gb-false_premise-19b5f2b3_abs",
+    "answer": "I'm actually thinking of visiting South Korea.",
+    "confidence": 0.7317594156136803
+  },
+  {
+    "id": "gb-false_premise-2133c1b5_abs",
+    "answer": "I'm still getting used to living in Tokyo, but I've been enjoying the independence of my new studio apartment in Harajuku - it's been a month now, and the commute to work is really convenient.",
+    "confidence": 0.577615600060275
+  },
+  {
+    "id": "gb-false_premise-2311e44b_abs",
+    "answer": "Can you help me calculate how many pages I need to read per day to reach my goal of 50 books by the end of the year, considering I've already read 12 books so far?",
+    "confidence": 0.7934624468710546
+  },
+  {
+    "id": "gb-false_premise-2698e78f_abs",
+    "answer": "And by the way, speaking of boundaries, I see Dr.",
+    "confidence": 0.7415443072991107
+  },
+  {
+    "id": "gb-false_premise-29f2956b_abs",
+    "answer": "Can you recommend some popular DAWs for beginners, and maybe some online resources to learn how to use them?",
+    "confidence": 0.4661357947716498
+  },
+  {
+    "id": "gb-false_premise-60bf93ed_abs",
+    "answer": "I bought it from Amazon on 1/15.",
+    "confidence": 0.14433637830644575
+  },
+  {
+    "id": "gb-false_premise-6456829e_abs",
+    "answer": "I planted 5 tomato plants initially, and they've been producing like crazy.",
+    "confidence": 0.7923249593339076
+  },
+  {
+    "id": "gb-false_premise-6aeb4375_abs",
+    "answer": "By the way, have you tried any good Korean restaurants in my city lately?",
+    "confidence": 0.35921506829648353
+  },
+  {
+    "id": "gb-false_premise-80ec1f4f_abs",
+    "answer": "I'll definitely search online for galleries and museums in my area.",
+    "confidence": 0.34107603394567454
+  },
+  {
+    "id": "gb-false_premise-88432d0a_abs",
+    "answer": "I've been using my new stand mixer nonstop since I got it a few weeks ago, and I'm sure it'll come in handy when making the crust.",
+    "confidence": 0.026258796363889725
+  },
+  {
+    "id": "gb-false_premise-982b5123_abs",
+    "answer": "By the way, I've had a great experience with Airbnb in the past, like when I stayed in Haight-Ashbury for my best friend's wedding and had to book three months in advance.",
+    "confidence": 0.9363598912944083
+  },
+  {
+    "id": "gb-false_premise-a96c20ee_abs",
+    "answer": "I've been interested in this field for a while, and I actually just presented a poster on my thesis research on it at my first research conference over the summer.",
+    "confidence": 0.39278463797742647
+  },
+  {
+    "id": "gb-false_premise-ba358f49_abs",
+    "answer": "By the way, my friend Rachel's getting married next year, and it's got me thinking about my own life goals.",
+    "confidence": 0.6692115268136738
+  },
+  {
+    "id": "gb-false_premise-bc8a6e93_abs",
+    "answer": "I've actually had a lot of success with lemon-based desserts in the past - I recently made a lemon blueberry cake for my niece's birthday party and it was a huge hit.",
+    "confidence": 0.7040373566435068
+  },
+  {
+    "id": "gb-false_premise-c8090214_abs",
+    "answer": "By the way, speaking of birthdays, I attended the annual Holiday Market at the local mall a week before Black Friday, and I saw some unique handmade jewelry there that I think she might like.",
+    "confidence": 0.0035142867657927956
+  },
+  {
+    "id": "gb-false_premise-e5ba910e_abs",
+    "answer": "What kind of content does it offer, and is it worth the price?",
+    "confidence": 0.016596250102550836
+  },
+  {
+    "id": "gb-false_premise-edced276_abs",
+    "answer": "I'm thinking of spending 4 days in Paris and 3 days in Rome.",
+    "confidence": 0.6817058792952625
+  },
+  {
+    "id": "gb-false_premise-eeda8a6d_abs",
+    "answer": "Can you tell me more about how to care for them and how they'll interact with my existing fish?",
+    "confidence": 0.6534819904106798
+  },
+  {
+    "id": "gb-false_premise-f4f1d8a4_abs",
+    "answer": "I actually got my new stand mixer as a birthday gift from my sister last month, and it's been a game-changer for making caramel.",
+    "confidence": 0.8730067114891292
+  },
+  {
+    "id": "gb-false_premise-f685340e_abs",
+    "answer": "Yeah, I'm planning to play tennis with my friends this Sunday at the local park.",
+    "confidence": 0.425111904940807
+  },
+  {
+    "id": "gb-false_premise-gpt4_372c3eed_abs",
+    "answer": "I'm particularly interested in the applications of AI in robotics, as I was part of the robotics team in high school and enjoyed it.",
+    "confidence": 0.6625329669335164
+  },
+  {
+    "id": "gb-false_premise-gpt4_70e84552_abs",
+    "answer": "By the way, I just fixed that broken fence on the east side of my property three weeks ago, where my goats like to graze, and it's been a huge relief to have them safe and secure.",
+    "confidence": 0.6104539737317304
+  },
+  {
+    "id": "gb-false_premise-gpt4_93159ced_abs",
+    "answer": "Lately, I've been working long hours on a high-priority project and my commute has increased, leaving me with little time for personal life.",
+    "confidence": 0.7322238091264214
+  },
+  {
+    "id": "gb-false_premise-gpt4_c27434e8_abs",
+    "answer": "I'm excited to use it on my Ferrari project.",
+    "confidence": 0.9985463289982932
+  },
+  {
+    "id": "gb-false_premise-gpt4_fe651585_abs",
+    "answer": "By the way, my cousin Alex, who adopted a baby girl from China in January, had a wonderful experience with her agency, which prioritized supporting birth mothers.",
+    "confidence": 0.17096550013673628
+  }
+]

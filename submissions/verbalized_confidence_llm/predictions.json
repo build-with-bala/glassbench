@@ -1,0 +1,452 @@
+[
+  {
+    "id": "gb-answerable-01493427",
+    "answer": "25",
+    "confidence": 0.92
+  },
+  {
+    "id": "gb-answerable-06db6396",
+    "answer": "5",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-08e075c7",
+    "answer": "9 months",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-0977f2af",
+    "answer": "Instant Pot",
+    "confidence": 0.85
+  },
+  {
+    "id": "gb-answerable-0e4e4c46",
+    "answer": "132",
+    "confidence": 0.92
+  },
+  {
+    "id": "gb-answerable-0f05491a",
+    "answer": "120",
+    "confidence": 0.85
+  },
+  {
+    "id": "gb-answerable-184da446",
+    "answer": "220",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-18bc8abd",
+    "answer": "Kansas City Masterpiece",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-1cea1afa",
+    "answer": "600",
+    "confidence": 0.92
+  },
+  {
+    "id": "gb-answerable-2133c1b5",
+    "answer": "3 months",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-2698e78f",
+    "answer": "every week",
+    "confidence": 0.88
+  },
+  {
+    "id": "gb-answerable-26bdc477",
+    "answer": "5 trips",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-3ba21379",
+    "answer": "Ford F-150 pickup truck",
+    "confidence": 0.88
+  },
+  {
+    "id": "gb-answerable-45dc21b6",
+    "answer": "3",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-4b24c848",
+    "answer": "5",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-4d6b87c8",
+    "answer": "25",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-5831f84d",
+    "answer": "15",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-59524333",
+    "answer": "6:00 pm",
+    "confidence": 0.82
+  },
+  {
+    "id": "gb-answerable-603deb26",
+    "answer": "10",
+    "confidence": 0.92
+  },
+  {
+    "id": "gb-answerable-618f13b2",
+    "answer": "6",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-6a27ffc2",
+    "answer": "30",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-6aeb4375",
+    "answer": "4",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-71315a70",
+    "answer": "10-12 hours",
+    "confidence": 0.85
+  },
+  {
+    "id": "gb-answerable-72e3ee87",
+    "answer": "50",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-7401057b",
+    "answer": "two",
+    "confidence": 0.85
+  },
+  {
+    "id": "gb-answerable-7a87bd0c",
+    "answer": "4 weeks",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-7e974930",
+    "answer": "$420",
+    "confidence": 0.88
+  },
+  {
+    "id": "gb-answerable-830ce83f",
+    "answer": "the suburbs",
+    "confidence": 0.7
+  },
+  {
+    "id": "gb-answerable-852ce960",
+    "answer": "$400,000",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-89941a93",
+    "answer": "4",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-9ea5eabc",
+    "answer": "Paris",
+    "confidence": 0.85
+  },
+  {
+    "id": "gb-answerable-a2f3aa27",
+    "answer": "1300",
+    "confidence": 0.8
+  },
+  {
+    "id": "gb-answerable-affe2881",
+    "answer": "32",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-b6019101",
+    "answer": "5",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-c7dc5443",
+    "answer": "5-2",
+    "confidence": 0.88
+  },
+  {
+    "id": "gb-answerable-cc5ded98",
+    "answer": "two hours",
+    "confidence": 0.88
+  },
+  {
+    "id": "gb-answerable-ce6d2d27",
+    "answer": "Friday",
+    "confidence": 0.88
+  },
+  {
+    "id": "gb-answerable-cf22b7bf",
+    "answer": "10 pounds",
+    "confidence": 0.88
+  },
+  {
+    "id": "gb-answerable-db467c8c",
+    "answer": "nine months",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-e493bb7c",
+    "answer": "above my bed",
+    "confidence": 0.8
+  },
+  {
+    "id": "gb-answerable-e61a7584",
+    "answer": "9 months",
+    "confidence": 0.9
+  },
+  {
+    "id": "gb-answerable-ed4ddc30",
+    "answer": "20 dozen",
+    "confidence": 0.85
+  },
+  {
+    "id": "gb-answerable-f9e8c073",
+    "answer": "5",
+    "confidence": 0.85
+  },
+  {
+    "id": "gb-stale-07741c44",
+    "answer": "under my bed",
+    "confidence": 0.6
+  },
+  {
+    "id": "gb-stale-0ddfec37",
+    "answer": "15",
+    "confidence": 0.6
+  },
+  {
+    "id": "gb-stale-10e09553",
+    "answer": "7",
+    "confidence": 0.6
+  },
+  {
+    "id": "gb-stale-50635ada",
+    "answer": "Premier Silver",
+    "confidence": 0.6
+  },
+  {
+    "id": "gb-stale-5a4f22c0",
+    "answer": "TechCorp",
+    "confidence": 0.62
+  },
+  {
+    "id": "gb-stale-89941a94",
+    "answer": "a road bike",
+    "confidence": 0.55
+  },
+  {
+    "id": "gb-stale-9bbe84a2",
+    "answer": "level 100",
+    "confidence": 0.62
+  },
+  {
+    "id": "gb-stale-c4ea545c",
+    "answer": "Yes",
+    "confidence": 0.58
+  },
+  {
+    "id": "gb-stale-dfde3500",
+    "answer": "Wednesday",
+    "confidence": 0.62
+  },
+  {
+    "id": "gb-stale-e66b632c",
+    "answer": "27 minutes and 45 seconds",
+    "confidence": 0.58
+  },
+  {
+    "id": "gb-stale-f685340e",
+    "answer": "Previously weekly, now every other week",
+    "confidence": 0.55
+  },
+  {
+    "id": "gb-contradiction-07741c44",
+    "answer": "I don't keep them anywhere now",
+    "confidence": 0.3
+  },
+  {
+    "id": "gb-contradiction-2698e78f",
+    "answer": "I no longer have sessions scheduled",
+    "confidence": 0.3
+  },
+  {
+    "id": "gb-contradiction-50635ada",
+    "answer": "no elite status",
+    "confidence": 0.3
+  },
+  {
+    "id": "gb-contradiction-603deb26",
+    "answer": "0",
+    "confidence": 0.3
+  },
+  {
+    "id": "gb-contradiction-6071bd76",
+    "answer": "no set ratio anymore",
+    "confidence": 0.3
+  },
+  {
+    "id": "gb-contradiction-6aeb4375",
+    "answer": "0",
+    "confidence": 0.3
+  },
+  {
+    "id": "gb-contradiction-852ce960",
+    "answer": "no pre-approval amount",
+    "confidence": 0.3
+  },
+  {
+    "id": "gb-contradiction-89941a94",
+    "answer": "none",
+    "confidence": 0.3
+  },
+  {
+    "id": "gb-contradiction-945e3d21",
+    "answer": "I don't attend any",
+    "confidence": 0.3
+  },
+  {
+    "id": "gb-contradiction-9bbe84a2",
+    "answer": "no target level",
+    "confidence": 0.3
+  },
+  {
+    "id": "gb-contradiction-dfde3500",
+    "answer": "no set day",
+    "confidence": 0.3
+  },
+  {
+    "id": "gb-contradiction-e66b632c",
+    "answer": "no recorded personal best",
+    "confidence": 0.3
+  },
+  {
+    "id": "gb-false_premise-031748ae_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-0862e8bf_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-09ba9854_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-0ddfec37_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-15745da0_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-19b5f2b3_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-2133c1b5_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-2311e44b_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-2698e78f_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-29f2956b_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-60bf93ed_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-6456829e_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-6aeb4375_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-80ec1f4f_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-88432d0a_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-982b5123_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-a96c20ee_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-ba358f49_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-bc8a6e93_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-c8090214_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-e5ba910e_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-edced276_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-eeda8a6d_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-f4f1d8a4_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-f685340e_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-gpt4_372c3eed_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-gpt4_70e84552_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-gpt4_93159ced_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-gpt4_c27434e8_abs",
+    "abstain": true
+  },
+  {
+    "id": "gb-false_premise-gpt4_fe651585_abs",
+    "abstain": true
+  }
+]
