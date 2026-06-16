@@ -1,0 +1,38 @@
+# The site image only needs the three Markdown docs + site/build_site.py (see Dockerfile).
+# Everything else is excluded so the build context stays tiny and a benchmark-data or
+# package change never busts the image cache or leaks ~18 MB of data into the context.
+
+# Large data + upstream source (never needed by the site).
+data/
+*.jsonl
+
+# Python package, baselines, tests, scripts, submissions — not part of the site.
+glassbench/
+baselines/
+tests/
+scripts/
+submissions/
+*.egg-info/
+
+# Pre-rendered output (the image regenerates it in the build stage).
+site/dist/
+site/.playwright-mcp/
+
+# VCS / tooling / caches.
+.git/
+.github/
+.gitignore
+.pytest_cache/
+__pycache__/
+**/__pycache__/
+*.pyc
+.venv/
+build/
+dist/
+
+# Docs not used by the site generator.
+CONTRIBUTING.md
+PRE_REGISTRATION.md
+Makefile
+pyproject.toml
+requirements.txt
