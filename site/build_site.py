@@ -482,9 +482,10 @@ def page_shell(*, title: str, subtitle: str, active_html: str, body: str,
 # 4. Number formatting helpers (precision matched to the JSON exactly)
 # ======================================================================================
 
-# 2-dp metrics: glass + abstention recalls. 3-dp metrics: cwr/aurc/ece/brier.
-_FMT2 = {"glass_score", "abst_rec_contradiction", "abst_rec_false_premise", "answerable_accuracy"}
-_FMT3 = {"cwr", "aurc_norm", "ece", "brier", "cwr_macro", "ece_macro", "brier_macro"}
+# 2-dp metrics: glass + abstention recalls. 3-dp metrics: cwr/aurc/ece/brier +
+# answerable_accuracy (the answer pillar A — carried at 3-dp in LEADERBOARD.md / the JSON).
+_FMT2 = {"glass_score", "abst_rec_contradiction", "abst_rec_false_premise"}
+_FMT3 = {"cwr", "aurc_norm", "ece", "brier", "cwr_macro", "ece_macro", "brier_macro", "answerable_accuracy"}
 
 
 def fmt_metric(key: str, val) -> str:
@@ -701,31 +702,43 @@ def render_cwr_strip() -> str:
     # Collapse duplicate CWR (the two 0.000? only always_abstain is 0). Stagger labels
     # by alternating above/below to avoid overlap.
     ticks = []
+    n_ticks = len(rows)
     for idx, r in enumerate(rows):
         cwr = r["cwr"]
         pct = min(100.0, cwr / axis_max * 100.0)
         ramp = _cwr_ramp_class(cwr)
         side = "above" if idx % 2 == 0 else "below"
+        # Anchor the extreme labels to their own edge (left-align the first tick's label,
+        # right-align the last tick's) so the centered nowrap labels can't run off the
+        # track or overprint the BETTER / WORSE end captions.
+        edge = ""
+        if idx == 0:
+            edge = " cwr-edge-l"
+        elif idx == n_ticks - 1:
+            edge = " cwr-edge-r"
         ticks.append(
-            f'<div class="cwr-tick cwr-{ramp} cwr-{side}" style="left:{pct:.2f}%" '
+            f'<div class="cwr-tick cwr-{ramp} cwr-{side}{edge}" style="left:{pct:.2f}%" '
             f'data-system="{html.escape(r["system"])}">'
             f'<span class="cwr-dot"></span>'
             f'<span class="cwr-lab"><b>{html.escape(r["system"])}</b>'
             f'<span class="cwr-val">{fmt_metric("cwr", cwr)}</span></span>'
             f'</div>'
         )
-    # The confidently-wrong threshold marker at the right end framing.
+    # End captions carry direction only (BETTER / WORSE). The redundant 0.000 / 0.700
+    # numerals were dropped: they collided with the extreme tick labels and the green/red
+    # direction captions already convey the scale.
     return (
         '<figure class="cwr-strip" aria-labelledby="cwr-cap">'
         '<div class="cwr-scale-wrap">'
         '<div class="cwr-scanline" aria-hidden="true"></div>'
         '<div class="cwr-axis">'
-        '<span class="cwr-end cwr-end-l">0.000<br><small>BETTER</small></span>'
+        '<span class="cwr-end cwr-end-l"><small>BETTER</small></span>'
         '<div class="cwr-track">' + "".join(ticks) + '</div>'
-        '<span class="cwr-end cwr-end-r">0.700<br><small>WORSE</small></span>'
+        '<span class="cwr-end cwr-end-r"><small>WORSE</small></span>'
         '</div></div>'
         '<figcaption id="cwr-cap" class="figcap">Confidently-Wrong Rate across all '
-        'ranked systems. Lower is better. Most systems have never measured this axis.'
+        'ranked systems, plotted 0.000 (left) to 0.700 (right). Lower is better. '
+        'Most systems have never measured this axis.'
         '</figcaption></figure>'
     )
 
@@ -1147,7 +1160,7 @@ def render_split_donut() -> str:
 STYLE_CSS = r""":root{
   /* substrate */
   --bg:#0c0f14; --panel:#11161f; --panel-2:#161d28; --border:#243040;
-  --ink:#e7ecf3; --muted:#9fb0c3; --faint:#6b7c91;
+  --ink:#e7ecf3; --muted:#9fb0c3; --faint:#7d8ea3;
   /* signal colors — roles are fixed */
   --accent:#57c7e3;     /* CYAN  = measured data / primary metric / selected */
   --accent-2:#8fe3a8;   /* GREEN = honest / safe / good-for-direction */
@@ -1243,6 +1256,10 @@ a{color:var(--accent);text-decoration:none;}
 .cwr-lab .cwr-val{color:currentColor;font-size:.72rem;}
 .cwr-above .cwr-lab{bottom:18px;}
 .cwr-below .cwr-lab{top:18px;}
+/* Anchor the first/last tick labels to their own edge so they clear the BETTER /
+   WORSE end captions instead of overprinting them (centered nowrap would overflow). */
+.cwr-edge-l .cwr-lab{left:0;transform:none;text-align:left;}
+.cwr-edge-r .cwr-lab{left:auto;right:0;transform:none;text-align:right;}
 .figcap{font:500 .8rem/1.5 var(--mono);color:var(--faint);margin-top:14px;letter-spacing:.01em;}
 .figcap b{color:var(--muted);font-weight:600;}
 /* hero stats */
@@ -1551,9 +1568,33 @@ pre code{background:none;border:0;padding:0;color:var(--ink);font-size:.84rem;li
   .content{padding:32px 16px 70px;}
   .ov-section{margin:48px 0;}
   .hdr{height:auto;padding:8px 0;flex-direction:column;gap:6px;}
+  /* Let the nav wrap and centre so every item (incl. "GitHub ↗") stays fully
+     visible instead of the last item being clipped at the right edge. */
+  .site-header nav{flex-wrap:wrap;justify-content:center;gap:2px 4px;width:100%;}
+  .site-header nav a{padding:7px 9px;}
   .split-group{grid-template-columns:1fr;}
   .fig-chart{height:300px;}
   .stat-num{font-size:1.5rem;}
+  /* CWR strip: the percentage-positioned horizontal scale collides badly at phone
+     widths, so swap it for a stacked vertical readout — one row per system, dot +
+     name + value — which stays legible with no overlap or clipping. */
+  .cwr-scale-wrap{padding:6px 0;}
+  .cwr-scanline{display:none;}
+  .cwr-axis{flex-direction:column;align-items:stretch;gap:8px;}
+  .cwr-end{text-align:left;flex:0 0 auto;font-size:.7rem;}
+  .cwr-end small{font-size:.7rem;}
+  .cwr-end-r{order:3;text-align:right;}
+  .cwr-track{order:2;flex:none;height:auto;background:none;opacity:1;
+    display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--grid);
+    border-bottom:1px solid var(--grid);padding:8px 0;}
+  .cwr-tick{position:static;transform:none;display:flex;align-items:center;gap:10px;
+    width:100%;}
+  .cwr-dot{flex:0 0 auto;width:10px;height:10px;box-shadow:0 0 0 1.5px currentColor;}
+  .cwr-lab{position:static!important;left:auto!important;right:auto!important;
+    transform:none!important;white-space:nowrap;text-align:left!important;
+    display:flex;align-items:baseline;gap:8px;flex:1;}
+  .cwr-lab b{display:inline;}
+  .cwr-lab .cwr-val{margin-left:auto;}
 }
 
 /* ============ reduced motion (mandatory) ============ */
@@ -1699,8 +1740,8 @@ APP_JS = r"""/* GlassBench site — vanilla enhancement layer. Degrades to stati
   function meanSafety(r){return (r.abst_rec_contradiction+r.abst_rec_false_premise)/2;}
 
   function fmt(key,v){
-    var two={glass_score:1,abst_rec_contradiction:1,abst_rec_false_premise:1,answerable_accuracy:1};
-    var three={cwr:1,aurc_norm:1,ece:1,brier:1,cwr_macro:1,ece_macro:1,brier_macro:1};
+    var two={glass_score:1,abst_rec_contradiction:1,abst_rec_false_premise:1};
+    var three={cwr:1,aurc_norm:1,ece:1,brier:1,cwr_macro:1,ece_macro:1,brier_macro:1,answerable_accuracy:1};
     if(two[key])return v.toFixed(2);
     if(three[key])return v.toFixed(3);
     return ""+v;
