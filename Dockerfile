@@ -9,11 +9,16 @@
 # Build:  docker build -t glassbench-site .
 # Run:    docker run --rm -p 8080:80 glassbench-site   # -> http://localhost:8080
 
-# ---- Stage 1: render the static HTML from the committed Markdown ---------------------
+# ---- Stage 1: render the static site (stdlib Python only — no pip, no node) ----------
 FROM python:3.12-alpine AS build
 WORKDIR /src
-# Only the inputs the generator reads + the generator itself, so a docs edit busts cache
-# without dragging the whole package in.
+# Inputs the generator reads + the generator itself, so a docs edit busts cache without
+# dragging the whole package in. The generator hand-authors the Overview + Leaderboard
+# (the verified leaderboard data is a Python literal inside build_site.py) and renders
+# the Datasheet from DATASHEET.md. README.md / LEADERBOARD.md are kept in the COPY for
+# cache-busting + provenance even though the generator no longer reads them directly.
+# It emits index.html, leaderboard.html, datasheet.html, style.css, app.js and
+# leaderboard.json into /out — all served as static files by nginx below.
 COPY README.md LEADERBOARD.md DATASHEET.md ./
 COPY site/build_site.py ./site/build_site.py
 RUN python site/build_site.py --out /out

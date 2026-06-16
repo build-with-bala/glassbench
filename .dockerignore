@@ -1,4 +1,6 @@
-# The site image only needs the three Markdown docs + site/build_site.py (see Dockerfile).
+# The site image only needs DATASHEET.md (rendered) + README.md / LEADERBOARD.md (kept
+# for provenance/cache) + site/build_site.py (which carries the verified leaderboard data
+# and emits the HTML/CSS/JS/JSON). See the Dockerfile Stage-1 COPY list.
 # Everything else is excluded so the build context stays tiny and a benchmark-data or
 # package change never busts the image cache or leaks ~18 MB of data into the context.
 
