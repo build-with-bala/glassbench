@@ -1,19 +1,35 @@
-import { GlassPanel } from '../components/ui/GlassPanel'
+import { getLeaderboard } from '../lib/glassbench-data'
+import { Hero } from '../components/story/Hero'
+import { CwrStrip } from '../components/story/CwrStrip'
+import { SplitMatrix } from '../components/story/SplitMatrix'
+import { FormulaSchematic } from '../components/story/FormulaSchematic'
+import { ConfidenceDial } from '../components/story/ConfidenceDial'
+import { Reveal } from '../components/motion/Reveal'
 
 export default function Home() {
+  const d = getLeaderboard()
+  const glassLeader = d.ranked.reduce((m, r) => Math.max(m, r.glass_score), 0)
+  // Best CWR among systems that actually answer — a system that never answers
+  // trivially scores CWR 0, which would understate the difficulty.
+  const answerers = d.ranked.filter((r) => r.answered > 0)
+  const bestCwr = (answerers.length ? answerers : d.ranked).reduce((m, r) => Math.min(m, r.cwr), Infinity)
+  const systems = d.ranked.map((r) => ({ system: r.system, cwr: r.cwr }))
+
   return (
-    <main id="main" style={{ maxWidth: 1040, margin: '0 auto', padding: '3rem 1.5rem' }}>
-      <GlassPanel>
-        <div style={{ padding: 'clamp(1.6rem, 5vw, 3.2rem)' }}>
-          <p style={{ color: 'var(--muted)', margin: 0, fontSize: '1.05rem' }}>
-            Every memory benchmark asks “did it remember?”
-          </p>
-          <h1 style={{ margin: '0.4rem 0 0', fontSize: 'clamp(2.2rem, 6vw, 3.6rem)', lineHeight: 1.04 }}>
-            GlassBench asks:{' '}
-            <span style={{ color: 'var(--cyan)' }}>does it know when it didn’t?</span>
-          </h1>
-        </div>
-      </GlassPanel>
+    <main id="main" style={{ maxWidth: 1080, margin: '0 auto', padding: '1rem clamp(0.8rem, 3vw, 1.6rem) 0' }}>
+      <Hero glassLeader={glassLeader} bestCwr={bestCwr} items={d.n_items} />
+      <Reveal>
+        <CwrStrip systems={systems} max={0.7} />
+      </Reveal>
+      <Reveal>
+        <SplitMatrix counts={d.split_counts} />
+      </Reveal>
+      <Reveal>
+        <FormulaSchematic formula={d.glass_score_formula} />
+      </Reveal>
+      <Reveal>
+        <ConfidenceDial />
+      </Reveal>
     </main>
   )
 }
