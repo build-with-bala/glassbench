@@ -1,6 +1,8 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import Link from 'next/link'
+import gsap from 'gsap'
 import { CountUp } from '../ui/CountUp'
 
 interface Props {
@@ -10,19 +12,39 @@ interface Props {
 }
 
 export function Hero({ glassLeader, bestCwr, items }: Props) {
+  const rootRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce || !rootRef.current) return
+    const ctx = gsap.context(() => {
+      gsap.from('[data-hero-anim]', {
+        y: 24,
+        opacity: 0,
+        duration: 0.85,
+        ease: 'power3.out',
+        stagger: 0.09,
+        delay: 0.08,
+      })
+    }, rootRef)
+    return () => ctx.revert()
+  }, [])
+
   return (
-    <section className="hero glass-panel">
-      <p className="hero-q1">Every memory benchmark asks “did it remember?”</p>
-      <h1 className="hero-q2">
+    <section ref={rootRef} className="hero glass-panel">
+      <p className="hero-q1" data-hero-anim>
+        Every memory benchmark asks “did it remember?”
+      </p>
+      <h1 className="hero-q2" data-hero-anim>
         GlassBench asks: <span className="hl">does it know when it didn’t?</span>
       </h1>
-      <p className="hero-lede">
+      <p className="hero-lede" data-hero-anim>
         Long-context, RAG, MemGPT, Mem0, Zep — all scored on accuracy. But a deployed memory fails another way:
         it answers <em>confidently</em> when the fact changed, was retracted, or was never stated. GlassBench
         measures that.
       </p>
 
-      <div className="hero-stats">
+      <div className="hero-stats" data-hero-anim>
         <div className="stat stat-cyan">
           <span className="stat-eye mono">GLASS LEADER</span>
           <span className="stat-num mono">
@@ -43,7 +65,7 @@ export function Hero({ glassLeader, bestCwr, items }: Props) {
         </div>
       </div>
 
-      <div className="hero-cta">
+      <div className="hero-cta" data-hero-anim>
         <Link className="btn btn-primary" href="/leaderboard">
           View leaderboard <span aria-hidden="true">→</span>
         </Link>
