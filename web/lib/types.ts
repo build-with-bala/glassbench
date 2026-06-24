@@ -34,9 +34,23 @@ export interface RankedRow {
   [k: string]: unknown
 }
 
-export interface ReferenceRow extends Omit<RankedRow, 'rank' | 'type' | 'description' | 'reproduce'> {
+// Defined explicitly (not via Omit<RankedRow>) — Omit over a type carrying a
+// string index signature collapses the named fields back into `unknown`.
+export interface ReferenceRow {
+  system: string
+  glass_score: number
+  cwr: number
+  aurc_norm: number
+  abst_rec_contradiction: number
+  abst_rec_false_premise: number
+  ece: number
+  brier: number
+  answerable_accuracy: number
+  answered: number
+  abstained: number
   what_it_is: string
   excluded_reason: string
+  [k: string]: unknown
 }
 
 export interface SplitCounts {
