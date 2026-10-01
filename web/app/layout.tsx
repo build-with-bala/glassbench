@@ -1,11 +1,18 @@
 import './globals.css'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
 import { ThemeProvider } from '../components/theme/ThemeProvider'
 import { GlassWorldMount } from '../components/world/GlassWorldMount'
 import { SmoothScroll } from '../components/motion/SmoothScroll'
 import { Nav } from '../components/ui/Nav'
 import { Footer } from '../components/ui/Footer'
 import { SITE_URL, REPO_URL } from '../lib/site'
+import { getLeaderboard } from '../lib/glassbench-data'
+
+/* Self-hosted by next/font: the files are fetched at build time and served from
+   this origin — no runtime request to a font CDN, no external stylesheet. */
+const sans = Geist({ subsets: ['latin'], display: 'swap', variable: '--font-sans' })
+const mono = Geist_Mono({ subsets: ['latin'], display: 'swap', variable: '--font-mono' })
 
 const DESCRIPTION =
   'A benchmark for whether a memory-equipped LLM system knows when it doesn’t know. Headline metric: Confidently-Wrong Rate (CWR).'
@@ -34,6 +41,13 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#0f100e' },
+    { media: '(prefers-color-scheme: light)', color: '#edeee8' },
+  ],
+}
+
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -59,15 +73,17 @@ const jsonLd = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // the world draws one slab per benchmark item; counts come from the scorer output
+  const { split_counts } = getLeaderboard()
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <ThemeProvider>
           <a className="skip-link" href="#main">
             Skip to content
           </a>
-          <GlassWorldMount />
+          <GlassWorldMount counts={split_counts} />
           <SmoothScroll>
             <div className="content-root">
               <Nav />
