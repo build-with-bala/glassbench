@@ -1,0 +1,1211 @@
+{
+ "_generated_by": "scripts/gen_validator_fixtures.py \u2014 do not edit by hand",
+ "validator": "scripts/validate_submission.py",
+ "data_file": "data/glassbench_v0.1.jsonl",
+ "codes": [
+  "invalid_json",
+  "not_array",
+  "empty",
+  "row_not_object",
+  "missing_id",
+  "id_not_string",
+  "unknown_id",
+  "duplicate_id",
+  "gold_leakage",
+  "abstain_not_true",
+  "abstain_with_answer",
+  "missing_confidence",
+  "confidence_not_number",
+  "confidence_out_of_range",
+  "missing_answer",
+  "extra_keys",
+  "gold_echo",
+  "coverage"
+ ],
+ "cases": [
+  {
+   "name": "real_agent_llm",
+   "note": "A shipped submission, verbatim.",
+   "text": "[\n  {\n    \"id\": \"gb-answerable-01493427\",\n    \"answer\": \"Speaking of which, I just realized I've added 25 new postcards to my collection since I started collecting again.\",\n    \"confidence\": 0.8104651162790698\n  },\n  {\n    \"id\": \"gb-answerable-06db6396\",\n    \"answer\": \"Since I've completed 4 projects since starting painting classes, I feel more confident in my skills.\",\n    \"confidence\": 0.654054054054054\n  },\n  {\n    \"id\": \"gb-answerable-08e075c7\",\n    \"answer\": \"By the way, speaking of tracking my health, I just realized I've been using my Fitbit Charge 3 for 9 months now - it's crazy how time flies!\",\n    \"confidence\": 0.7391891891891892\n  },\n  {\n    \"id\": \"gb-answerable-0977f2af\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-0e4e4c46\",\n    \"answer\": \"By the way, speaking of building and creating things, I just got my highest score in Ticket to Ride - 132 points!\",\n    \"confidence\": 0.834375\n  },\n  {\n    \"id\": \"gb-answerable-0f05491a\",\n    \"answer\": \"To correct myself, I actually need **125 stars** to reach the Gold level on the Starbucks Rewards app, not 400.\",\n    \"confidence\": 0.6869565217391304\n  },\n  {\n    \"id\": \"gb-answerable-184da446\",\n    \"answer\": \"I've been reading \\\"A Short History of Nearly Everything\\\" and it's amazing how much we still don't know about the human body.\",\n    \"confidence\": 0.5829545454545454\n  },\n  {\n    \"id\": \"gb-answerable-18bc8abd\",\n    \"answer\": \"By the way, I've been loving my new Weber gas grill for quick weeknight dinners, and I'm currently obsessed with Kansas City Masterpiece BBQ sauce on my ribs.\",\n    \"confidence\": 0.6675\n  },\n  {\n    \"id\": \"gb-answerable-1cea1afa\",\n    \"answer\": \"I'm going to post a quick update on my Instagram Story to remind my followers about the Q&A session tomorrow.\",\n    \"confidence\": 0.8430232558139535\n  },\n  {\n    \"id\": \"gb-answerable-2133c1b5\",\n    \"answer\": \"I'm still getting used to living in Tokyo, but I've been enjoying the independence of my new studio apartment in Harajuku - it's been a month now, and the commute to work is really convenient.\",\n    \"confidence\": 0.5911764705882353\n  },\n  {\n    \"id\": \"gb-answerable-2698e78f\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-26bdc477\",\n    \"answer\": \"By the way, I've had my Canon EOS 80D with me on five trips now, and it's been a beast!\",\n    \"confidence\": 0.59\n  },\n  {\n    \"id\": \"gb-answerable-3ba21379\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-45dc21b6\",\n    \"answer\": \"By the way, I've tried out 3 of Emma's recipes so far, and they're all amazing!\",\n    \"confidence\": 0.7833333333333333\n  },\n  {\n    \"id\": \"gb-answerable-4b24c848\",\n    \"answer\": \"I've already bought three tops from H&M, I'm really loving their summer collection.\",\n    \"confidence\": 0.6108695652173913\n  },\n  {\n    \"id\": \"gb-answerable-4d6b87c8\",\n    \"answer\": \"I've got a lot of titles on my to-watch list, currently 25, and I'm always looking to add more.\",\n    \"confidence\": 0.8078947368421052\n  },\n  {\n    \"id\": \"gb-answerable-5831f84d\",\n    \"answer\": \"By the way, I've been on a learning streak lately, having watched 15 Crash Course videos in the past few weeks.\",\n    \"confidence\": 0.7541666666666667\n  },\n  {\n    \"id\": \"gb-answerable-59524333\",\n    \"answer\": \"I need to make sure I'm done with the meeting before I head to the gym, which is usually at 6:00 pm.\",\n    \"confidence\": 0.7999999999999999\n  },\n  {\n    \"id\": \"gb-answerable-603deb26\",\n    \"answer\": \"By the way, speaking of gin, I've tried making a Negroni at home 10 times now since my friend Emma showed me how to make it.\",\n    \"confidence\": 0.89125\n  },\n  {\n    \"id\": \"gb-answerable-618f13b2\",\n    \"answer\": \"And, I'm happy to report that I've worn my new black Converse Chuck Taylor All Star sneakers four times already, including to my friend's birthday party last Saturday.\",\n    \"confidence\": 0.7152777777777778\n  },\n  {\n    \"id\": \"gb-answerable-6a27ffc2\",\n    \"answer\": \"By the way, I've been brushing up on my Python skills by watching Corey Schafer's Python programming series on YouTube, and I've completed 20 videos so far.\",\n    \"confidence\": 0.585\n  },\n  {\n    \"id\": \"gb-answerable-6aeb4375\",\n    \"answer\": \"By the way, have you tried any good Korean restaurants in my city lately?\",\n    \"confidence\": 0.7551724137931034\n  },\n  {\n    \"id\": \"gb-answerable-71315a70\",\n    \"answer\": \"I've already spent 10-12 hours on my abstract ocean sculpture, and I'm excited to explore new techniques and materials for my next piece.\",\n    \"confidence\": 0.875\n  },\n  {\n    \"id\": \"gb-answerable-72e3ee87\",\n    \"answer\": \"By the way, I've been watching Crash Course's Science series, and I just completed 50 episodes - it's been really helpful in understanding the basics of science.\",\n    \"confidence\": 0.8781249999999999\n  },\n  {\n    \"id\": \"gb-answerable-7401057b\",\n    \"answer\": \"Can you help me understand how many free night's stays I can redeem at any Hilton property with my accumulated points?\",\n    \"confidence\": 0.6038461538461538\n  },\n  {\n    \"id\": \"gb-answerable-7a87bd0c\",\n    \"answer\": \"By the way, I've been sticking to my daily tidying routine for 4 weeks now, and it's amazing how much of a difference it's made in my apartment.\",\n    \"confidence\": 0.8099999999999999\n  },\n  {\n    \"id\": \"gb-answerable-7e974930\",\n    \"answer\": \"By the way, speaking of recent sales, I earned $420 at the Downtown Farmers Market on my most recent visit.\",\n    \"confidence\": 0.751231527093596\n  },\n  {\n    \"id\": \"gb-answerable-830ce83f\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-852ce960\",\n    \"answer\": \"By the way, I'm really looking forward to finally owning a home, it's been a long process, but it'll be worth it to have a backyard like the one I'll have - remember when I got pre-approved for $400,000 from Wells Fargo?\",\n    \"confidence\": 0.5903940886699508\n  },\n  {\n    \"id\": \"gb-answerable-89941a93\",\n    \"answer\": \"By the way, speaking of bikes, I just got a new one recently, so I'll actually have four bikes with me on this trip - my road bike, mountain bike, commuter bike, and a new hybrid bike I just purchased.\",\n    \"confidence\": 0.5368421052631579\n  },\n  {\n    \"id\": \"gb-answerable-9ea5eabc\",\n    \"answer\": \"Since I've been thinking about my recent family trip to Paris, I was wondering if you could help me compare and contrast my experiences traveling with family versus solo.\",\n    \"confidence\": 0.6871875\n  },\n  {\n    \"id\": \"gb-answerable-a2f3aa27\",\n    \"answer\": \"And by the way, I've got 1250 followers on Instagram now, so it'd be great to get some insights on how to optimize my content for them.\",\n    \"confidence\": 0.6375\n  },\n  {\n    \"id\": \"gb-answerable-affe2881\",\n    \"answer\": \"By the way, speaking of bird identification, I've been keeping track of the species I've seen in my local park, and I've managed to spot 27 different species so far.\",\n    \"confidence\": 0.525\n  },\n  {\n    \"id\": \"gb-answerable-b6019101\",\n    \"answer\": \"By the way, I've been on a roll with movies lately - I've watched 12 films in the last 3 months, including 5 MCU films, which is a lot for me!\",\n    \"confidence\": 0.6509090909090909\n  },\n  {\n    \"id\": \"gb-answerable-c7dc5443\",\n    \"answer\": \"I'm thinking of hosting a mini tournament to wrap up the season, and I'd like to invite some of my friends from the volleyball league to join in on the fun.\",\n    \"confidence\": 0.6649999999999999\n  },\n  {\n    \"id\": \"gb-answerable-cc5ded98\",\n    \"answer\": \"I've been dedicating about two hours each day to coding exercises, and I'm excited to see progress in my skills over the next few weeks.\",\n    \"confidence\": 0.7225\n  },\n  {\n    \"id\": \"gb-answerable-ce6d2d27\",\n    \"answer\": \"Speaking of cocktails, I have a cocktail-making class on Friday, and I'm thinking of experimenting with some new recipes.\",\n    \"confidence\": 0.613235294117647\n  },\n  {\n    \"id\": \"gb-answerable-cf22b7bf\",\n    \"answer\": \"By the way, speaking of my cardio days, I've been doing great and I just realized I've lost 10 pounds since I started going consistently to the gym 3 months ago.\",\n    \"confidence\": 0.7416666666666666\n  },\n  {\n    \"id\": \"gb-answerable-db467c8c\",\n    \"answer\": \"I'll ask the attorney about their experience with similar cases and how they can help me address the issue with my parents' overstaying their visa, considering they've been staying with me for nine months now.\",\n    \"confidence\": 0.8708333333333332\n  },\n  {\n    \"id\": \"gb-answerable-e493bb7c\",\n    \"answer\": \"By the way, speaking of my bedroom, I recently moved the \\\"Ethereal Dreams\\\" painting by Emma Taylor above my bed, and it adds a nice touch to the space.\",\n    \"confidence\": 0.6862934362934363\n  },\n  {\n    \"id\": \"gb-answerable-e61a7584\",\n    \"answer\": \"I've had my cat, Luna, for about 9 months now, and I've been trying to keep her active and engaged.\",\n    \"confidence\": 0.8234374999999999\n  },\n  {\n    \"id\": \"gb-answerable-ed4ddc30\",\n    \"answer\": \"By the way, I was thinking of using some of our fresh eggs from the coop - we've got 20 dozen stocked up in the fridge right now.\",\n    \"confidence\": 0.6509090909090909\n  },\n  {\n    \"id\": \"gb-answerable-f9e8c073\",\n    \"answer\": \"I did attend three sessions of the bereavement support group, and it really helped me process my emotions.\",\n    \"confidence\": 0.5880434782608696\n  },\n  {\n    \"id\": \"gb-stale-07741c44\",\n    \"answer\": \"By the way, I need to organize my closet this weekend, and I'm looking forward to storing my old sneakers in a shoe rack, they're currently taking up space.\",\n    \"confidence\": 0.63\n  },\n  {\n    \"id\": \"gb-stale-0ddfec37\",\n    \"answer\": \"By the way, I just got back from a weekend trip and had some time to organize my collection - I've added 20 autographed baseballs to my collection in the past few months, which is crazy!\",\n    \"confidence\": 0.6314285714285715\n  },\n  {\n    \"id\": \"gb-stale-10e09553\",\n    \"answer\": \"Oh, and by the way, I caught 7 largemouth bass on my trip to Lake Michigan with Alex on 7/10 - that was a great day!\",\n    \"confidence\": 0.4575\n  },\n  {\n    \"id\": \"gb-stale-50635ada\",\n    \"answer\": \"Can you tell me what my current frequent flyer status is on United Airlines?\",\n    \"confidence\": 0.4295258620689655\n  },\n  {\n    \"id\": \"gb-stale-5a4f22c0\",\n    \"answer\": \"By the way, speaking of networking, I was just thinking about catching up with Rachel, an old colleague from my previous company, who's currently at TechCorp.\",\n    \"confidence\": 0.6831081081081081\n  },\n  {\n    \"id\": \"gb-stale-89941a94\",\n    \"answer\": \"By the way, speaking of bikes, I just got a new one recently, so I'll actually have four bikes with me on this trip - my road bike, mountain bike, commuter bike, and a new hybrid bike I just purchased.\",\n    \"confidence\": 0.5618421052631579\n  },\n  {\n    \"id\": \"gb-stale-9bbe84a2\",\n    \"answer\": \"By the way, I've been playing a lot of Apex lately and I'm determined to reach level 100 before the end of the year.\",\n    \"confidence\": 0.32906403940886697\n  },\n  {\n    \"id\": \"gb-stale-c4ea545c\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-stale-dfde3500\",\n    \"answer\": \"By the way, I have a language exchange session with my tutor Maria this week, so I want to make sure I'm prepared.\",\n    \"confidence\": 0.535\n  },\n  {\n    \"id\": \"gb-stale-e66b632c\",\n    \"answer\": \"Oh, and by the way, I just got back from a charity 5K run last weekend and was happy to beat my personal best time - shaved off about a minute and a half from my previous record!\",\n    \"confidence\": 0.7534883720930232\n  },\n  {\n    \"id\": \"gb-stale-f685340e\",\n    \"answer\": \"Oh, and by the way, I'm planning to play tennis with my friends at the local park this Sunday, like we do every other week.\",\n    \"confidence\": 0.6133640552995391\n  },\n  {\n    \"id\": \"gb-contradiction-07741c44\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-2698e78f\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-50635ada\",\n    \"answer\": \"Can you tell me what my current frequent flyer status is on United Airlines?\",\n    \"confidence\": 0.65\n  },\n  {\n    \"id\": \"gb-contradiction-603deb26\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-6071bd76\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-6aeb4375\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-852ce960\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-89941a94\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-945e3d21\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-9bbe84a2\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-dfde3500\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-e66b632c\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-031748ae_abs\",\n    \"answer\": \"I lead a team of 4 engineers in my new role as Senior Software Engineer.\",\n    \"confidence\": 0.5458333333333333\n  },\n  {\n    \"id\": \"gb-false_premise-0862e8bf_abs\",\n    \"answer\": \"By the way, my cat's name is Luna, and she's been such a sweetie throughout all the changes we've been making to her environment.\",\n    \"confidence\": 0.6458333333333333\n  },\n  {\n    \"id\": \"gb-false_premise-09ba9854_abs\",\n    \"answer\": \"By the way, I was told that taking a taxi from the airport to my hotel would cost around $60, which is a bit pricey for me.\",\n    \"confidence\": 0.625\n  },\n  {\n    \"id\": \"gb-false_premise-0ddfec37_abs\",\n    \"answer\": \"By the way, I just got back from a weekend trip and had some time to organize my collection - I've added 20 autographed baseballs to my collection in the past few months, which is crazy!\",\n    \"confidence\": 0.5671428571428571\n  },\n  {\n    \"id\": \"gb-false_premise-15745da0_abs\",\n    \"answer\": \"I've been collecting vintage cameras for three months now, and I've already amassed a pretty impressive collection.\",\n    \"confidence\": 0.53125\n  },\n  {\n    \"id\": \"gb-false_premise-19b5f2b3_abs\",\n    \"answer\": \"I'm thinking of visiting the Demilitarized Zone (DMZ) between North and South Korea.\",\n    \"confidence\": 0.8766666666666666\n  },\n  {\n    \"id\": \"gb-false_premise-2133c1b5_abs\",\n    \"answer\": \"I'm still getting used to living in Tokyo, but I've been enjoying the independence of my new studio apartment in Harajuku - it's been a month now, and the commute to work is really convenient.\",\n    \"confidence\": 0.4411764705882353\n  },\n  {\n    \"id\": \"gb-false_premise-2311e44b_abs\",\n    \"answer\": \"For example, I've been reading \\\"Sapiens\\\" at a pace of 10-20 pages a week.\",\n    \"confidence\": 0.4192307692307692\n  },\n  {\n    \"id\": \"gb-false_premise-2698e78f_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-29f2956b_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-60bf93ed_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-6456829e_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-6aeb4375_abs\",\n    \"answer\": \"By the way, have you tried any good Korean restaurants in my city lately?\",\n    \"confidence\": 0.6426724137931034\n  },\n  {\n    \"id\": \"gb-false_premise-80ec1f4f_abs\",\n    \"answer\": \"I'll definitely search online for galleries and museums in my area.\",\n    \"confidence\": 0.5585714285714285\n  },\n  {\n    \"id\": \"gb-false_premise-88432d0a_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-982b5123_abs\",\n    \"answer\": \"By the way, I've had a great experience with Airbnb in the past, like when I stayed in Haight-Ashbury for my best friend's wedding and had to book three months in advance.\",\n    \"confidence\": 0.4194444444444444\n  },\n  {\n    \"id\": \"gb-false_premise-a96c20ee_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-ba358f49_abs\",\n    \"answer\": \"By the way, my friend Rachel's getting married next year, and it's got me thinking about my own life goals.\",\n    \"confidence\": 0.30625\n  },\n  {\n    \"id\": \"gb-false_premise-bc8a6e93_abs\",\n    \"answer\": \"I've actually had a lot of success with lemon-based desserts in the past - I recently made a lemon blueberry cake for my niece's birthday party and it was a huge hit.\",\n    \"confidence\": 0.4073529411764706\n  },\n  {\n    \"id\": \"gb-false_premise-c8090214_abs\",\n    \"answer\": \"By the way, speaking of birthdays, I attended the annual Holiday Market at the local mall a week before Black Friday, and I saw some unique handmade jewelry there that I think she might like.\",\n    \"confidence\": 0.5881696428571428\n  },\n  {\n    \"id\": \"gb-false_premise-e5ba910e_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-edced276_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-eeda8a6d_abs\",\n    \"answer\": \"I'm actually thinking of adding some decorations to the 20-gallon tank to create more hiding places for the fish, especially the neon tetras.\",\n    \"confidence\": 0.8396551724137931\n  },\n  {\n    \"id\": \"gb-false_premise-f4f1d8a4_abs\",\n    \"answer\": \"I actually got my new stand mixer as a birthday gift from my sister last month, and it's been a game-changer for making caramel.\",\n    \"confidence\": 0.4222222222222223\n  },\n  {\n    \"id\": \"gb-false_premise-f685340e_abs\",\n    \"answer\": \"Oh, and by the way, I'm planning to play tennis with my friends at the local park this Sunday, like we do every other week.\",\n    \"confidence\": 0.6133640552995391\n  },\n  {\n    \"id\": \"gb-false_premise-gpt4_372c3eed_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-gpt4_70e84552_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-gpt4_93159ced_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-gpt4_c27434e8_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-gpt4_fe651585_abs\",\n    \"abstain\": true\n  }\n]\n",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": []
+   }
+  },
+  {
+   "name": "real_always_abstain",
+   "note": "A shipped all-abstain submission, verbatim.",
+   "text": "[\n  {\n    \"id\": \"gb-answerable-01493427\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-06db6396\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-08e075c7\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-0977f2af\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-0e4e4c46\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-0f05491a\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-184da446\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-18bc8abd\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-1cea1afa\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-2133c1b5\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-2698e78f\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-26bdc477\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-3ba21379\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-45dc21b6\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-4b24c848\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-4d6b87c8\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-5831f84d\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-59524333\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-603deb26\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-618f13b2\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-6a27ffc2\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-6aeb4375\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-71315a70\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-72e3ee87\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-7401057b\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-7a87bd0c\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-7e974930\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-830ce83f\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-852ce960\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-89941a93\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-9ea5eabc\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-a2f3aa27\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-affe2881\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-b6019101\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-c7dc5443\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-cc5ded98\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-ce6d2d27\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-cf22b7bf\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-db467c8c\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-e493bb7c\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-e61a7584\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-ed4ddc30\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-answerable-f9e8c073\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-stale-07741c44\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-stale-0ddfec37\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-stale-10e09553\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-stale-50635ada\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-stale-5a4f22c0\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-stale-89941a94\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-stale-9bbe84a2\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-stale-c4ea545c\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-stale-dfde3500\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-stale-e66b632c\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-stale-f685340e\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-07741c44\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-2698e78f\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-50635ada\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-603deb26\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-6071bd76\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-6aeb4375\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-852ce960\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-89941a94\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-945e3d21\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-9bbe84a2\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-dfde3500\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-contradiction-e66b632c\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-031748ae_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-0862e8bf_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-09ba9854_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-0ddfec37_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-15745da0_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-19b5f2b3_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-2133c1b5_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-2311e44b_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-2698e78f_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-29f2956b_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-60bf93ed_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-6456829e_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-6aeb4375_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-80ec1f4f_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-88432d0a_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-982b5123_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-a96c20ee_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-ba358f49_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-bc8a6e93_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-c8090214_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-e5ba910e_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-edced276_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-eeda8a6d_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-f4f1d8a4_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-f685340e_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-gpt4_372c3eed_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-gpt4_70e84552_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-gpt4_93159ced_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-gpt4_c27434e8_abs\",\n    \"abstain\": true\n  },\n  {\n    \"id\": \"gb-false_premise-gpt4_fe651585_abs\",\n    \"abstain\": true\n  }\n]\n",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": []
+   }
+  },
+  {
+   "name": "valid_mixed_partial",
+   "note": "Answers and abstentions; omitted ids are allowed (coverage warning).",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 0.9\n },\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": true\n },\n {\n  \"id\": \"gb-stale-07741c44\",\n  \"answer\": \"under my bed\",\n  \"confidence\": 0.55\n },\n {\n  \"id\": \"gb-false_premise-031748ae_abs\",\n  \"abstain\": true\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "valid_wrapped_object",
+   "note": "The {\"predictions\": [...]} wrapper is accepted.",
+   "text": "{\n \"predictions\": [\n  {\n   \"id\": \"gb-answerable-01493427\",\n   \"answer\": \"Seattle\",\n   \"confidence\": 0.9\n  },\n  {\n   \"id\": \"gb-contradiction-07741c44\",\n   \"abstain\": true\n  }\n ]\n}",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "valid_confidence_bounds",
+   "note": "Confidence exactly 0, exactly 1, and an integer 1.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 0.0\n },\n {\n  \"id\": \"gb-answerable-06db6396\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 1.0\n },\n {\n  \"id\": \"gb-stale-07741c44\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 1\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "valid_low_confidence_answer",
+   "note": "A confidence below 0.5 is legal (scored as an abstention).",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 0.31\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "valid_unicode_answer",
+   "note": "Non-ASCII answer text.",
+   "text": "[{\"id\": \"gb-answerable-01493427\", \"answer\": \"Z\u00fcrich \u2014 \u6771\u4eac \u2615\", \"confidence\": 0.8}]",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "valid_answer_on_unanswerable",
+   "note": "Answering an unanswerable item is legal (just wrong).",
+   "text": "[\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"answer\": \"under my bed\",\n  \"confidence\": 0.9\n },\n {\n  \"id\": \"gb-false_premise-031748ae_abs\",\n  \"answer\": \"five engineers\",\n  \"confidence\": 0.9\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "valid_single_gold_echo",
+   "note": "ONE unanswerable item answered with the gold sentinel is not flagged.",
+   "text": "[\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"answer\": \"ABSTAIN\",\n  \"confidence\": 0.9\n },\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 0.9\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "valid_partial_gold_echo",
+   "note": "Echoing gold on some but not all answered unanswerable items is not flagged.",
+   "text": "[\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"answer\": \"ABSTAIN\",\n  \"confidence\": 0.9\n },\n {\n  \"id\": \"gb-contradiction-2698e78f\",\n  \"answer\": \"ABSTAIN\",\n  \"confidence\": 0.9\n },\n {\n  \"id\": \"gb-false_premise-031748ae_abs\",\n  \"answer\": \"something else\",\n  \"confidence\": 0.9\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "warn_abstain_with_answer",
+   "note": "An abstain row that also carries answer/confidence.",
+   "text": "[\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": true,\n  \"answer\": \"x\",\n  \"confidence\": 0.2\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+     {
+      "code": "abstain_with_answer",
+      "row": 0
+     },
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "warn_abstain_extra_key",
+   "note": "An abstain row with an unexpected key.",
+   "text": "[\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": true,\n  \"notes\": \"retracted\"\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+     {
+      "code": "extra_keys",
+      "row": 0
+     },
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "warn_answer_extra_key",
+   "note": "An answered row with an unexpected key.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"x\",\n  \"confidence\": 0.9,\n  \"latency_ms\": 12\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+     {
+      "code": "extra_keys",
+      "row": 0
+     },
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "warn_missing_answer",
+   "note": "An answered row with a confidence but no answer.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"confidence\": 0.9\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+     {
+      "code": "missing_answer",
+      "row": 0
+     },
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_json_truncated",
+   "note": "Truncated JSON.",
+   "text": "[{\"id\": \"gb-answerable-01493427\", \"answer\": \"x\", \"confid",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "invalid_json",
+      "row": null
+     }
+    ],
+    "warnings": []
+   }
+  },
+  {
+   "name": "bad_json_trailing_comma",
+   "note": "Trailing comma.",
+   "text": "[{\"id\": \"gb-answerable-01493427\", \"abstain\": true},]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "invalid_json",
+      "row": null
+     }
+    ],
+    "warnings": []
+   }
+  },
+  {
+   "name": "bad_json_empty_file",
+   "note": "An empty file.",
+   "text": "",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "invalid_json",
+      "row": null
+     }
+    ],
+    "warnings": []
+   }
+  },
+  {
+   "name": "bad_json_bom",
+   "note": "A UTF-8 byte-order mark before the array.",
+   "text": "\ufeff[\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": true\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "invalid_json",
+      "row": null
+     }
+    ],
+    "warnings": []
+   }
+  },
+  {
+   "name": "bad_not_array_object",
+   "note": "A JSON object without a predictions key.",
+   "text": "{\n \"id\": \"gb-answerable-01493427\",\n \"abstain\": true\n}",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "not_array",
+      "row": null
+     }
+    ],
+    "warnings": []
+   }
+  },
+  {
+   "name": "bad_not_array_string",
+   "note": "A JSON string.",
+   "text": "\"predictions\"",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "not_array",
+      "row": null
+     }
+    ],
+    "warnings": []
+   }
+  },
+  {
+   "name": "bad_not_array_number",
+   "note": "A JSON number.",
+   "text": "42",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "not_array",
+      "row": null
+     }
+    ],
+    "warnings": []
+   }
+  },
+  {
+   "name": "bad_not_array_null",
+   "note": "JSON null.",
+   "text": "null",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "not_array",
+      "row": null
+     }
+    ],
+    "warnings": []
+   }
+  },
+  {
+   "name": "bad_wrapped_not_array",
+   "note": "A predictions key that is not an array.",
+   "text": "{\n \"predictions\": {\n  \"id\": \"gb-answerable-01493427\"\n }\n}",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "not_array",
+      "row": null
+     }
+    ],
+    "warnings": []
+   }
+  },
+  {
+   "name": "bad_empty_array",
+   "note": "An empty array.",
+   "text": "[]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "empty",
+      "row": null
+     }
+    ],
+    "warnings": []
+   }
+  },
+  {
+   "name": "bad_empty_wrapped",
+   "note": "An empty wrapped array.",
+   "text": "{\n \"predictions\": []\n}",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "empty",
+      "row": null
+     }
+    ],
+    "warnings": []
+   }
+  },
+  {
+   "name": "bad_row_not_object",
+   "note": "Rows that are not objects.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 0.9\n },\n \"abstain\",\n 7,\n null,\n [\n  \"gb-contradiction-07741c44\",\n  true\n ],\n true\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "row_not_object",
+      "row": 1
+     },
+     {
+      "code": "row_not_object",
+      "row": 2
+     },
+     {
+      "code": "row_not_object",
+      "row": 3
+     },
+     {
+      "code": "row_not_object",
+      "row": 4
+     },
+     {
+      "code": "row_not_object",
+      "row": 5
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_missing_id",
+   "note": "A row without an id.",
+   "text": "[\n {\n  \"answer\": \"x\",\n  \"confidence\": 0.9\n },\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": true\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "missing_id",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_id_not_string",
+   "note": "Ids that are not strings.",
+   "text": "[\n {\n  \"id\": 12,\n  \"abstain\": true\n },\n {\n  \"id\": null,\n  \"abstain\": true\n },\n {\n  \"id\": [\n   \"gb-answerable-01493427\"\n  ],\n  \"abstain\": true\n },\n {\n  \"id\": {\n   \"v\": \"gb-answerable-01493427\"\n  },\n  \"abstain\": true\n },\n {\n  \"id\": true,\n  \"abstain\": true\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "id_not_string",
+      "row": 0
+     },
+     {
+      "code": "id_not_string",
+      "row": 1
+     },
+     {
+      "code": "id_not_string",
+      "row": 2
+     },
+     {
+      "code": "id_not_string",
+      "row": 3
+     },
+     {
+      "code": "id_not_string",
+      "row": 4
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_unknown_id",
+   "note": "An id that is not in the scored data version.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-does-not-exist\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 0.9\n },\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": true\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "unknown_id",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_example_template",
+   "note": "The EXAMPLE template: placeholder ids only.",
+   "text": "[\n  {\"id\": \"example_answerable_0001\", \"answer\": \"Seattle\", \"confidence\": 0.91},\n  {\"id\": \"example_stale_0002\", \"answer\": \"a 2019 Toyota Corolla\", \"confidence\": 0.42},\n  {\"id\": \"example_contradiction_0003\", \"abstain\": true},\n  {\"id\": \"example_false_premise_0004\", \"abstain\": true}\n]\n",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "unknown_id",
+      "row": 0
+     },
+     {
+      "code": "unknown_id",
+      "row": 1
+     },
+     {
+      "code": "unknown_id",
+      "row": 2
+     },
+     {
+      "code": "unknown_id",
+      "row": 3
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_duplicate_id",
+   "note": "The same id twice.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 0.9\n },\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": true\n },\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Portland\",\n  \"confidence\": 0.4\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "duplicate_id",
+      "row": 2
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_duplicate_unknown_id",
+   "note": "An unknown id, twice.",
+   "text": "[\n {\n  \"id\": \"nope\",\n  \"abstain\": true\n },\n {\n  \"id\": \"nope\",\n  \"abstain\": true\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "unknown_id",
+      "row": 0
+     },
+     {
+      "code": "unknown_id",
+      "row": 1
+     },
+     {
+      "code": "duplicate_id",
+      "row": 1
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_triplicate_id",
+   "note": "The same id three times (two duplicate errors).",
+   "text": "[\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": true\n },\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": true\n },\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": true\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "duplicate_id",
+      "row": 1
+     },
+     {
+      "code": "duplicate_id",
+      "row": 2
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_confidence_above_one",
+   "note": "Confidence above 1.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 1.5\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "confidence_out_of_range",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_confidence_negative",
+   "note": "Negative confidence.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": -0.1\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "confidence_out_of_range",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_confidence_percent",
+   "note": "A percentage instead of a probability.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 91\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "confidence_out_of_range",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_confidence_string",
+   "note": "Confidence as a string.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": \"0.9\"\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "confidence_not_number",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_confidence_bool",
+   "note": "Confidence as a boolean.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": true\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "confidence_not_number",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_confidence_null",
+   "note": "Confidence null.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": null\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "confidence_not_number",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_confidence_list",
+   "note": "Confidence as a list.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": [\n   0.9\n  ]\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "confidence_not_number",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_confidence_huge",
+   "note": "A float literal that overflows to infinity.",
+   "text": "[{\"id\": \"gb-answerable-01493427\", \"answer\": \"x\", \"confidence\": 1e999}]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "confidence_out_of_range",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_confidence_huge_int",
+   "note": "An integer literal too large for a float.",
+   "text": "[{\"id\": \"gb-answerable-01493427\", \"answer\": \"x\", \"confidence\": 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000}]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "confidence_out_of_range",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_missing_confidence",
+   "note": "An answer without a confidence.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"x\"\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "missing_confidence",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_id_only_row",
+   "note": "A row with only an id (neither answer nor abstain).",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\"\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "missing_confidence",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "missing_answer",
+      "row": 0
+     },
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_abstain_false",
+   "note": "abstain: false.",
+   "text": "[\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": false\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "abstain_not_true",
+      "row": 0
+     },
+     {
+      "code": "missing_confidence",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "missing_answer",
+      "row": 0
+     },
+     {
+      "code": "extra_keys",
+      "row": 0
+     },
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_abstain_string",
+   "note": "abstain: \"true\".",
+   "text": "[\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": \"true\"\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "abstain_not_true",
+      "row": 0
+     },
+     {
+      "code": "missing_confidence",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "missing_answer",
+      "row": 0
+     },
+     {
+      "code": "extra_keys",
+      "row": 0
+     },
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_abstain_one",
+   "note": "abstain: 1.",
+   "text": "[\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": 1\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "abstain_not_true",
+      "row": 0
+     },
+     {
+      "code": "missing_confidence",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "missing_answer",
+      "row": 0
+     },
+     {
+      "code": "extra_keys",
+      "row": 0
+     },
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_abstain_null",
+   "note": "abstain: null.",
+   "text": "[\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": null\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "abstain_not_true",
+      "row": 0
+     },
+     {
+      "code": "missing_confidence",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "missing_answer",
+      "row": 0
+     },
+     {
+      "code": "extra_keys",
+      "row": 0
+     },
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_abstain_false_with_answer",
+   "note": "abstain: false next to a valid answer.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"abstain\": false,\n  \"answer\": \"x\",\n  \"confidence\": 0.9\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "abstain_not_true",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "extra_keys",
+      "row": 0
+     },
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_gold_field_split",
+   "note": "A prediction row carrying the split label.",
+   "text": "[\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"abstain\": true,\n  \"split\": \"contradiction\"\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "gold_leakage",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_gold_fields_copied_item",
+   "note": "A dataset object copied into the predictions.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"x\",\n  \"confidence\": 0.9,\n  \"gold_answer\": \"x\",\n  \"evidence_spans\": [\n   \"...\"\n  ],\n  \"answer_topic\": \"t\",\n  \"source_id\": \"s\"\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "gold_leakage",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_gold_echo_all",
+   "note": "Every answered unanswerable item reproduces the gold sentinel.",
+   "text": "[\n {\n  \"id\": \"gb-contradiction-07741c44\",\n  \"answer\": \"ABSTAIN\",\n  \"confidence\": 0.9\n },\n {\n  \"id\": \"gb-false_premise-031748ae_abs\",\n  \"answer\": \" ABSTAIN \",\n  \"confidence\": 0.9\n },\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 0.9\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "gold_echo",
+      "row": null
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_everything",
+   "note": "Many violations in one file.",
+   "text": "[\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 2\n },\n {\n  \"id\": \"gb-answerable-01493427\",\n  \"answer\": \"Seattle\",\n  \"confidence\": 0.5\n },\n {\n  \"id\": \"ghost\",\n  \"abstain\": \"yes\",\n  \"split\": \"stale\"\n },\n {\n  \"confidence\": 0.3\n },\n \"junk\",\n {\n  \"id\": \"gb-false_premise-0862e8bf_abs\",\n  \"abstain\": true\n }\n]",
+   "compare": "full",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "confidence_out_of_range",
+      "row": 0
+     },
+     {
+      "code": "duplicate_id",
+      "row": 1
+     },
+     {
+      "code": "unknown_id",
+      "row": 2
+     },
+     {
+      "code": "gold_leakage",
+      "row": 2
+     },
+     {
+      "code": "abstain_not_true",
+      "row": 2
+     },
+     {
+      "code": "missing_confidence",
+      "row": 2
+     },
+     {
+      "code": "missing_id",
+      "row": 3
+     },
+     {
+      "code": "row_not_object",
+      "row": 4
+     }
+    ],
+    "warnings": [
+     {
+      "code": "missing_answer",
+      "row": 2
+     },
+     {
+      "code": "extra_keys",
+      "row": 2
+     },
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_confidence_nan",
+   "note": "The non-standard NaN literal (Python parses it; browsers do not).",
+   "text": "[{\"id\": \"gb-answerable-01493427\", \"answer\": \"x\", \"confidence\": NaN}]",
+   "compare": "verdict",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "confidence_out_of_range",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "bad_confidence_infinity",
+   "note": "The non-standard Infinity literal (Python parses it; browsers do not).",
+   "text": "[{\"id\": \"gb-answerable-01493427\", \"answer\": \"x\", \"confidence\": Infinity}]",
+   "compare": "verdict",
+   "python": {
+    "valid": false,
+    "errors": [
+     {
+      "code": "confidence_out_of_range",
+      "row": 0
+     }
+    ],
+    "warnings": [
+     {
+      "code": "coverage",
+      "row": null
+     }
+    ]
+   }
+  }
+ ]
+}

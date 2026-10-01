@@ -19,6 +19,8 @@
 #                           LEADERBOARD.md             scripts/gen_leaderboard.py --check
 #                           results/leaderboard.json   scripts/gen_leaderboard.py --json --check
 #                           results/item_results.json  scripts/export_results.py --check
+#                           web/test/fixtures/validator-parity.json
+#                                                      scripts/gen_validator_fixtures.py --check
 #                         Fail-closed: a missing generator or any drift FAILS the build.
 #   5. submission scoring (PRs only) — when a PR adds/changes a
 #                         submissions/<name>/predictions.json, validate it against the
@@ -157,11 +159,16 @@ jobs:
           echo "::group::results/item_results.json"
           python scripts/export_results.py --check || status=1
           echo "::endgroup::"
+          # What the real validator says about a fixed set of files; the site's unit tests
+          # hold the in-browser checker to it. Stale => the port is tested against old rules.
+          echo "::group::web/test/fixtures/validator-parity.json"
+          python scripts/gen_validator_fixtures.py --check || status=1
+          echo "::endgroup::"
           if [ "$status" -ne 0 ]; then
             echo "::error::A generated artifact differs from the committed file. Run 'make leaderboard' (then 'make web-data') and commit the result."
             exit 1
           fi
-          echo "Leaderboard gate PASSED: LEADERBOARD.md, results/leaderboard.json and results/item_results.json are byte-stable."
+          echo "Leaderboard gate PASSED: LEADERBOARD.md, results/leaderboard.json, results/item_results.json and the validator parity fixture are byte-stable."
 
       - name: Find changed submissions (PRs only)
         id: changed
