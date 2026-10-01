@@ -4,7 +4,9 @@
 # works — that is provided by the packaging task. numpy is the only runtime
 # dependency of the scorer; pytest is the only extra we install here for tests.
 #
-# What this workflow enforces on every push / PR:
+# Two jobs run on every push / PR.
+#
+# `ci` (Python — the scorer pipeline):
 #   1. fetch oracle    — download the LongMemEval source if a URL secret is set (runs
 #                         BEFORE tests so the source-derived tests + determinism gate
 #                         can use it; absent source => those simply skip).
@@ -12,11 +14,28 @@
 #   3. determinism gate — rebuild data/glassbench_v0.1.jsonl from the public
 #                         LongMemEval oracle and assert it is BYTE-IDENTICAL to the
 #                         committed file (the frozen-data contract).
-#   4. leaderboard gate — regenerate the leaderboard and assert it matches the
-#                         committed LEADERBOARD.md.
+#   4. leaderboard gate — regenerate every artifact the scorer pipeline owns and assert
+#                         each is byte-identical to the committed file:
+#                           LEADERBOARD.md             scripts/gen_leaderboard.py --check
+#                           results/leaderboard.json   scripts/gen_leaderboard.py --json --check
+#                           results/item_results.json  scripts/export_results.py --check
+#                         Fail-closed: a missing generator or any drift FAILS the build.
 #   5. submission scoring (PRs only) — when a PR adds/changes a
-#                         submissions/<name>/predictions.json, validate + score it
-#                         with the frozen scorer and print its leaderboard row.
+#                         submissions/<name>/predictions.json, validate it against the
+#                         submission contract (scripts/validate_submission.py), require
+#                         its system.md, then score it with the frozen scorer and print
+#                         its leaderboard row.
+#
+# `web` (Node — the public site in web/):
+#   1. snapshot gate   — web/data/ (the committed snapshot the site is built from) must
+#                         be byte-identical to the scorer pipeline's output, so the site
+#                         can never show a number the scorer did not produce.
+#   2. unit tests      — vitest (data contracts, in-browser validator parity, ...).
+#   3. build           — `next build` (type-checks and statically generates every route).
+#
+# This workflow only verifies. It never deploys and holds no deploy credentials: the
+# live site is deployed by Coolify's own per-app webhook, by design. Do not add deploy
+# steps or tokens here.
 #
 # Notes on the oracle-dependent steps:
 #   * The LongMemEval oracle source (data/longmemeval_oracle.json, ~15 MB) is
@@ -28,10 +47,6 @@
 #     prints a clear ::warning:: and skips the byte-comparison rather than producing
 #     a false red check — but whenever the source IS present, a non-identical rebuild
 #     FAILS the build.
-#   * The leaderboard gate runs the repo's leaderboard generator if one exists
-#     (`scripts/make_leaderboard.py` or `python -m glassbench.leaderboard`). If the
-#     repo ships no generator yet, it warns and skips. When a generator exists, a
-#     drift from the committed LEADERBOARD.md FAILS the build.
 
 name: ci
 
@@ -40,8 +55,8 @@ on:
     branches: ["**"]
   pull_request:
 
-# Read-only: this workflow never pushes. (A future "post results to the PR" job
-# would request `pull-requests: write` here.)
+# Read-only: this workflow never pushes and never deploys. (A future "post results to
+# the PR" job would request `pull-requests: write` here.)
 permissions:
   contents: read
 
@@ -125,50 +140,28 @@ jobs:
           # Restore the committed bytes so later steps see the pristine tree.
           cp /tmp/glassbench_committed.jsonl "$committed"
 
-      - name: Leaderboard gate — regenerate and assert it matches the committed file
+      - name: Leaderboard gate — regenerate every scorer artifact, assert byte-identical
         run: |
           set -euo pipefail
-          committed="LEADERBOARD.md"
-          if [ ! -f "$committed" ]; then
-            echo "::error::Committed $committed is missing."
+          # The scorer is frozen; these generators only re-score the committed
+          # submissions and render them. Each exposes --check, which writes nothing and
+          # exits non-zero on any drift from the committed file. Fail-closed: there is
+          # no "generator missing => warn and skip" path.
+          status=0
+          echo "::group::LEADERBOARD.md"
+          python scripts/gen_leaderboard.py --check || status=1
+          echo "::endgroup::"
+          echo "::group::results/leaderboard.json"
+          python scripts/gen_leaderboard.py --json --check || status=1
+          echo "::endgroup::"
+          echo "::group::results/item_results.json"
+          python scripts/export_results.py --check || status=1
+          echo "::endgroup::"
+          if [ "$status" -ne 0 ]; then
+            echo "::error::A generated artifact differs from the committed file. Run 'make leaderboard' (then 'make web-data') and commit the result."
             exit 1
           fi
-          # Locate the repo's leaderboard generator. The scorer is frozen; the
-          # generator just re-scores the committed submissions and renders the table,
-          # and reproduces the committed LEADERBOARD.md byte-for-byte. It exposes a
-          # --check mode that asserts byte-stability and exits non-zero on drift,
-          # which is exactly the CI gate. If no generator is shipped, warn and skip
-          # rather than produce a false red.
-          gen=""
-          for cand in scripts/gen_leaderboard.py scripts/make_leaderboard.py; do
-            if [ -f "$cand" ]; then gen="python $cand"; break; fi
-          done
-          if [ -z "$gen" ] && python -c "import importlib.util,sys; sys.exit(0 if importlib.util.find_spec('glassbench.leaderboard') else 1)"; then
-            gen="python -m glassbench.leaderboard"
-          fi
-          if [ -z "$gen" ]; then
-            echo "::warning::No leaderboard generator found (scripts/gen_leaderboard.py, scripts/make_leaderboard.py, or glassbench.leaderboard) — skipping the leaderboard gate. Add a generator to enforce it."
-            exit 0
-          fi
-          echo "Using leaderboard generator: $gen"
-          # Prefer the generator's own --check (writes nothing, fails on drift).
-          if $gen --help 2>/dev/null | grep -q -- "--check"; then
-            $gen --check
-            echo "Leaderboard gate PASSED: --check confirms the committed LEADERBOARD.md is byte-stable."
-          else
-            # Fallback: snapshot, regenerate in place, compare, restore.
-            cp "$committed" /tmp/leaderboard_committed.md
-            $gen
-            if cmp -s "$committed" /tmp/leaderboard_committed.md; then
-              echo "Leaderboard gate PASSED: regenerated LEADERBOARD.md matches the committed file."
-            else
-              echo "::error::Regenerated LEADERBOARD.md differs from the committed file. Re-run the generator and commit the result."
-              diff "$committed" /tmp/leaderboard_committed.md || true
-              cp /tmp/leaderboard_committed.md "$committed"
-              exit 1
-            fi
-            cp /tmp/leaderboard_committed.md "$committed"
-          fi
+          echo "Leaderboard gate PASSED: LEADERBOARD.md, results/leaderboard.json and results/item_results.json are byte-stable."
 
       - name: Find changed submissions (PRs only)
         id: changed
@@ -193,9 +186,13 @@ jobs:
 
       - name: Validate + score changed submissions and print their rows
         if: github.event_name == 'pull_request'
+        env:
+          # Passed through the environment, never interpolated into the script: the
+          # paths come from the PR and must not be able to inject shell.
+          CHANGED_FILES: ${{ steps.changed.outputs.files }}
         run: |
           set -euo pipefail
-          files="${{ steps.changed.outputs.files }}"
+          files="$CHANGED_FILES"
           # Treat an all-whitespace value as empty.
           if [ -z "${files//[$'\n\r\t ']/}" ]; then
             echo "Nothing to score."
@@ -211,15 +208,70 @@ jobs:
               echo "::endgroup::"
               continue
             fi
-            # The scorer loads + validates the predictions (shape, ids, confidence
-            # range) and prints the full table including the Glass row; a malformed
-            # submission makes it exit non-zero, which fails this step.
+            dir="$(dirname "$f")"
+            name="$(basename "$dir")"
+            # The scorer itself is lenient (it clamps confidences and lets the last of
+            # a duplicated id win), so the submission CONTRACT is enforced here by the
+            # validator: row shape, confidence range, duplicate ids, unknown ids, gold
+            # leakage. The EXAMPLE template uses placeholder ids on purpose and is
+            # exempt.
+            if [ "$name" != "EXAMPLE" ]; then
+              if ! python scripts/validate_submission.py "$f"; then
+                echo "::error::$f violates the submission contract (see CONTRIBUTING.md)."
+                status=1
+              fi
+              if [ ! -s "$dir/system.md" ]; then
+                echo "::error::$dir/system.md is missing or empty — every submission needs one (copy submissions/EXAMPLE/system.md)."
+                status=1
+              fi
+            fi
+            # Print the full table including the Glass row; an unreadable file makes
+            # the scorer exit non-zero, which fails this step.
             if python -m glassbench.score --predictions "$f"; then
               :
             else
-              echo "::error::Scoring/validation failed for $f"
+              echo "::error::Scoring failed for $f"
               status=1
             fi
             echo "::endgroup::"
           done <<< "$files"
           exit "$status"
+
+  web:
+    name: web — snapshot gate + vitest + next build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      # --ignore-scripts: nothing the site needs runs a dependency lifecycle script, so
+      # none are allowed to (supply-chain hygiene).
+      - name: Install dependencies (lockfile, no lifecycle scripts)
+        run: npm ci --ignore-scripts
+
+      # The site is built from the committed snapshot in web/data/ (the Docker build
+      # context is just web/). It must be exactly what the scorer pipeline produced: the
+      # `ci` job proves results/*.json are fresh; this proves web/data/ matches them.
+      - name: Snapshot gate — web/data/ is byte-identical to the scorer pipeline's output
+        run: node scripts/sync-data.mjs --check
+
+      - name: Sync data
+        run: node scripts/sync-data.mjs
+
+      - name: Unit tests (vitest)
+        run: npm test
+
+      - name: Build (next build)
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
