@@ -1,0 +1,258 @@
+{
+  "benchmark": "GlassBench",
+  "version": "0.1",
+  "data_file": "data/glassbench_v0.1.jsonl",
+  "n_items": 96,
+  "split_counts": {
+    "answerable": 43,
+    "stale": 11,
+    "contradiction": 12,
+    "false_premise": 30
+  },
+  "primary_metric": "glass_score",
+  "primary_metric_label": "Glass Score",
+  "primary_metric_range": [
+    0,
+    100
+  ],
+  "sort": "desc",
+  "headline_metric": "cwr",
+  "headline_metric_label": "Confidently-Wrong Rate (CWR)",
+  "glass_score_formula": "100 * HM(AnswerableAccuracy, mean(AbstRec_contradiction, AbstRec_false_premise)) * (1 - CWR)",
+  "metrics": [
+    {
+      "key": "glass_score",
+      "label": "Glass Score",
+      "range": [
+        0,
+        100
+      ],
+      "direction": "higher",
+      "primary": true,
+      "scored": true,
+      "tooltip": "Composite 0-100: harmonic mean of answer & safety pillars, scaled by (1-CWR)."
+    },
+    {
+      "key": "cwr",
+      "label": "CWR",
+      "direction": "lower",
+      "headline": true,
+      "scored": true,
+      "tooltip": "Confidently-Wrong Rate: fraction wrong/unsupported at confidence >= 0.70, over all items."
+    },
+    {
+      "key": "aurc_norm",
+      "label": "AURC_norm",
+      "direction": "lower",
+      "scored": true,
+      "tooltip": "Normalized area under risk-coverage on answerable items (0=perfect ranker, 1=no selectivity)."
+    },
+    {
+      "key": "abst_rec_contradiction",
+      "label": "AbstRec_contra",
+      "direction": "higher",
+      "scored": true,
+      "tooltip": "Abstention recall on the contradiction (retracted-fact) split."
+    },
+    {
+      "key": "abst_rec_false_premise",
+      "label": "AbstRec_fp",
+      "direction": "higher",
+      "scored": true,
+      "tooltip": "Abstention recall on the false-premise (never-stated) split."
+    },
+    {
+      "key": "ece",
+      "label": "ECE",
+      "direction": "lower",
+      "scored": true,
+      "tooltip": "Pooled, equal-mass 15-bin, bias-corrected expected calibration error over answered items."
+    },
+    {
+      "key": "brier",
+      "label": "Brier",
+      "direction": "lower",
+      "scored": true,
+      "tooltip": "Mean (confidence - correct)^2 over answered items."
+    },
+    {
+      "key": "cwr_macro",
+      "label": "CWR_macro",
+      "direction": "lower",
+      "scored": false,
+      "diagnostic": true,
+      "tooltip": "Split-balanced CWR (each split weighted equally). Reported only - NOT in Glass Score."
+    },
+    {
+      "key": "ece_macro",
+      "label": "ECE_macro",
+      "direction": "lower",
+      "scored": false,
+      "diagnostic": true,
+      "tooltip": "Split-balanced ECE. Reported only - NOT in Glass Score."
+    },
+    {
+      "key": "brier_macro",
+      "label": "Brier_macro",
+      "direction": "lower",
+      "scored": false,
+      "diagnostic": true,
+      "tooltip": "Split-balanced Brier. Reported only - NOT in Glass Score."
+    },
+    {
+      "key": "answerable_accuracy",
+      "label": "AnswerableAccuracy",
+      "direction": "higher",
+      "scored": false,
+      "diagnostic": true,
+      "tooltip": "Fraction of answerable+stale items answered correctly. The answer pillar A. Reported diagnostic."
+    }
+  ],
+  "ranked": [
+    {
+      "rank": 1,
+      "system": "agent_llm",
+      "glass_score": 54.34,
+      "cwr": 0.062,
+      "aurc_norm": 0.53,
+      "abst_rec_contradiction": 0.92,
+      "abst_rec_false_premise": 0.63,
+      "ece": 0.176,
+      "brier": 0.271,
+      "cwr_macro": 0.057,
+      "ece_macro": 0.491,
+      "brier_macro": 0.351,
+      "answerable_accuracy": 0.463,
+      "answered": 58,
+      "abstained": 38,
+      "type": "agentic memory baseline (deterministic heuristic; no LLM API / key)",
+      "description": "Genuine imperfect abstention-aware agent: reads only history+query, abstains on explicit retraction cues, extracts queried fact by last-write-wins lexical overlap, abstains when no sentence plausibly contains the target.",
+      "reproduce": "python baselines/agent_llm.py"
+    },
+    {
+      "rank": 2,
+      "system": "random_confidence",
+      "glass_score": 25.2,
+      "cwr": 0.177,
+      "aurc_norm": 0.767,
+      "abst_rec_contradiction": 0.83,
+      "abst_rec_false_premise": 0.4,
+      "ece": 0.438,
+      "brier": 0.448,
+      "cwr_macro": 0.173,
+      "ece_macro": 0.619,
+      "brier_macro": 0.507,
+      "answerable_accuracy": 0.204,
+      "answered": 45,
+      "abstained": 51,
+      "type": "calibration-floor baseline",
+      "description": "Answers all items with uniform-random confidence. Abstention recall on unanswerable splits is incidental (low random conf treated as abstention), not real routing.",
+      "reproduce": "python baselines/random_confidence.py"
+    },
+    {
+      "rank": 3,
+      "system": "bm25_retrieval",
+      "glass_score": 6.2,
+      "cwr": 0.51,
+      "aurc_norm": 0.904,
+      "abst_rec_contradiction": 0.08,
+      "abst_rec_false_premise": 0.07,
+      "ece": 0.462,
+      "brier": 0.475,
+      "cwr_macro": 0.581,
+      "ece_macro": 0.622,
+      "brier_macro": 0.522,
+      "answerable_accuracy": 0.407,
+      "answered": 92,
+      "abstained": 4,
+      "type": "retrieval baseline",
+      "description": "Retrieves the best-matching history sentence, maps retrieval score to confidence. Almost never abstains, so it answers retracted/false-premise queries confidently.",
+      "reproduce": "python baselines/bm25_retrieval.py"
+    },
+    {
+      "rank": 4,
+      "system": "always_answer",
+      "glass_score": 0.0,
+      "cwr": 0.698,
+      "aurc_norm": 0.896,
+      "abst_rec_contradiction": 0.0,
+      "abst_rec_false_premise": 0.0,
+      "ece": 0.523,
+      "brier": 0.568,
+      "cwr_macro": 0.781,
+      "ece_macro": 0.653,
+      "brier_macro": 0.635,
+      "answerable_accuracy": 0.537,
+      "answered": 96,
+      "abstained": 0,
+      "type": "degenerate baseline (recklessly answers all)",
+      "description": "Answers every item (recency) at confidence 0.9. Safety pillar = 0, so Glass = 0. Confidently wrong on 69.8% of items.",
+      "reproduce": "python baselines/always_answer.py"
+    },
+    {
+      "rank": 4,
+      "system": "always_abstain",
+      "glass_score": 0.0,
+      "cwr": 0.0,
+      "aurc_norm": 1.0,
+      "abst_rec_contradiction": 1.0,
+      "abst_rec_false_premise": 1.0,
+      "ece": 0.0,
+      "brier": 0.0,
+      "cwr_macro": 0.0,
+      "ece_macro": 0.0,
+      "brier_macro": 0.0,
+      "answerable_accuracy": 0.0,
+      "answered": 0,
+      "abstained": 96,
+      "type": "degenerate baseline (abstains everywhere)",
+      "description": "Abstains on everything. Perfect-looking abstention recall and CWR, but AnswerableAccuracy = 0 zeroes the answer pillar, so Glass = 0. Silence earns nothing.",
+      "reproduce": "python baselines/always_abstain.py"
+    }
+  ],
+  "references": [
+    {
+      "system": "abstention_aware_llm",
+      "glass_score": 99.07,
+      "cwr": 0.0,
+      "aurc_norm": 0.137,
+      "abst_rec_contradiction": 1.0,
+      "abst_rec_false_premise": 1.0,
+      "ece": 0.143,
+      "brier": 0.047,
+      "cwr_macro": 0.0,
+      "ece_macro": 0.235,
+      "brier_macro": 0.078,
+      "answerable_accuracy": 0.981,
+      "answered": 54,
+      "abstained": 42,
+      "what_it_is": "oracle: perfect answer/abstain routing (constructed from gold labels)",
+      "excluded_reason": "Constructed from gold labels; would be rejected as a real submission. Shown only to mark the top of the scale."
+    },
+    {
+      "system": "verbalized_confidence_llm",
+      "glass_score": 92.17,
+      "cwr": 0.031,
+      "aurc_norm": 0.904,
+      "abst_rec_contradiction": 1.0,
+      "abst_rec_false_premise": 1.0,
+      "ece": 0.122,
+      "brier": 0.091,
+      "cwr_macro": 0.017,
+      "ece_macro": 0.262,
+      "brier_macro": 0.126,
+      "answerable_accuracy": 0.907,
+      "answered": 54,
+      "abstained": 42,
+      "what_it_is": "constructed: confidence keyed to the split label",
+      "excluded_reason": "Confidence bands track the gold split label; no real model does this. Excluded from ranking."
+    }
+  ],
+  "authors_entry": "Not yet listed by design \u2014 added only once external entries exist; will report every split including those it fails.",
+  "notes": {
+    "tie_handling": "Standard competition ranking on 2-decimal Glass; always_answer and always_abstain tie at rank 4 (both 0.00).",
+    "sort_tiebreak": "Glass desc, then AnswerableAccuracy desc, then system name asc.",
+    "diagnostics_disclaimer": "cwr_macro / ece_macro / brier_macro / answerable_accuracy are reported-only diagnostics and are NOT part of the Glass Score.",
+    "vestigial_weights_warning": "The scorer's JSON still emits a 'weights' field. These are ABANDONED additive-draft weights NOT used by the v0.1 composite. Do NOT display them on the site."
+  }
+}

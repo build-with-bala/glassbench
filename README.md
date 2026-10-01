@@ -210,14 +210,18 @@ an `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`) — see [`baselines/README.md`](base
 python scripts/validate_submission.py submissions/agent_llm/predictions.json   # make validate EXAMPLE=...
 ```
 
-**6. Regenerate the leaderboard** (deterministic — reproduces the committed
-`LEADERBOARD.md` byte-for-byte; `--check` asserts byte-stability without writing):
+**6. Regenerate the leaderboard and the results data** (deterministic — each command
+reproduces its committed file byte-for-byte; add `--check` to assert that without writing):
 
 ```bash
-python scripts/gen_leaderboard.py          # writes LEADERBOARD.md          |  make leaderboard
+python scripts/gen_leaderboard.py          # writes LEADERBOARD.md              ┐
+python scripts/gen_leaderboard.py --json   # writes results/leaderboard.json    ├ make leaderboard
+python scripts/export_results.py           # writes results/item_results.json   ┘
 ```
 
-**Tests** (data-integrity + metric tests):
+`make check` runs all of them with `--check` — the same gate CI enforces.
+
+**Tests** (data-integrity, metric, export and validator tests):
 
 ```bash
 python -m pytest -q                                                          # make test
@@ -225,14 +229,63 @@ python -m pytest -q                                                          # m
 
 ---
 
+## Results as data, and the site
+
+The scorer pipeline writes three artifacts from `submissions/`, and nothing else is ever
+a source of numbers:
+
+| File | What it is |
+|---|---|
+| [`LEADERBOARD.md`](LEADERBOARD.md) | the board, for reading |
+| [`results/leaderboard.json`](results/leaderboard.json) | the same board as data — same ranks, same digits |
+| [`results/item_results.json`](results/item_results.json) | **per-item outcomes for every system**: answered or abstained, at what confidence, correct / wrong / confidently wrong, plus per-split breakdowns and the Glass Score pillars |
+
+The per-item outcomes are a *view* of the scorer, not a second scorer:
+[`glassbench/results.py`](glassbench/results.py) labels the records
+`glassbench.score.evaluate_items` already produces, and the tests pin those labels to the
+scorer's aggregates (the share of `confidently_wrong` items **is** CWR).
+
+The public site, [glassbench.buildwithbala.in](https://glassbench.buildwithbala.in), is
+the Next.js app in [`web/`](web/). It reads those files and **never scores anything**:
+
+| Route | What is there |
+|---|---|
+| `/leaderboard` | the ranked board; every row links to its system |
+| `/systems/<system>` | all metrics, per-split breakdown, the system's `system.md`, its reproduce command, rank context and its outcome on every item |
+| `/explore` | the 96 items — filter by split and outcome, search the queries; each item page shows the conversation history and every system's outcome on it |
+| `/compare?a=…&b=…` | two systems side by side with deltas, and the items where they disagree |
+| `/submit` | the submission steps, with an in-browser `predictions.json` checker (validation only) |
+| `/data` | documentation for the JSON endpoints below |
+
+Item pages keep the gold answer behind an explicit reveal and are `noindex`, so the site
+does not become an easy contamination source.
+
+**JSON endpoints** (static, CORS-open, no key) — consume results without scraping:
+
+```bash
+curl -s https://glassbench.buildwithbala.in/api/leaderboard.json          # results/leaderboard.json, byte for byte
+curl -s https://glassbench.buildwithbala.in/api/systems.json              # every system: summary + per-split breakdown
+curl -s https://glassbench.buildwithbala.in/api/systems/agent_llm.json    # one system: its outcome on every item
+curl -s https://glassbench.buildwithbala.in/api/items.json                # item × system outcome matrix
+```
+
+To work on the site, see [`web/README.md`](web/README.md). After changing a submission,
+`make web-data` regenerates the artifacts and refreshes the snapshot the site is built from.
+
+---
+
 ## Submit
 
 1. Run your system on `data/glassbench_v0.1.jsonl`, produce a `predictions.json` (one row
    per `id`: `{"id","answer","confidence"}` to answer, `{"id","abstain":true}` to abstain).
-2. Validate it: `python scripts/validate_submission.py submissions/<your_system>/predictions.json`.
+2. Validate it: `python scripts/validate_submission.py submissions/<your_system>/predictions.json`
+   — or drop the file into the checker on the site's
+   [submit page](https://glassbench.buildwithbala.in/submit#check), which runs the same rules
+   in your browser (it validates; it does not score).
 3. Open a PR adding `submissions/<your_system>/predictions.json` + a one-line system
    description (`system.md`). See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full contract.
-4. CI runs the scorer; your row appears on the [leaderboard](LEADERBOARD.md).
+4. CI validates and scores it; once merged, your row appears on the
+   [leaderboard](LEADERBOARD.md) and your system gets its own page on the site.
 
 No system is privileged. The authors' own system is **not yet listed** — by design.
 Bring yours.

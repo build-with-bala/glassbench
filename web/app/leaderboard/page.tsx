@@ -2,11 +2,13 @@ import type { Metadata } from 'next'
 import { getLeaderboard, scoredMetrics, columnRange } from '../../lib/glassbench-data'
 import { LeaderboardTable } from '../../components/leaderboard/LeaderboardTable'
 import { ReferenceScale } from '../../components/leaderboard/ReferenceScale'
+import { pageMetadata } from '../../lib/metadata'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Leaderboard',
   description: 'GlassBench leaderboard — ranked by Glass Score, with the Confidently-Wrong Rate (CWR) in full view.',
-}
+  path: '/leaderboard',
+})
 
 export default function LeaderboardPage() {
   const d = getLeaderboard()

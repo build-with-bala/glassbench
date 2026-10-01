@@ -1,4 +1,6 @@
+import Link from 'next/link'
 import type { Metric, ReferenceRow } from '../../lib/types'
+import { systemHref } from '../../lib/routes'
 
 interface Props {
   references: ReferenceRow[]
@@ -23,7 +25,9 @@ export function ReferenceScale({ references }: Props) {
         {references.map((r) => (
           <div key={r.system} className="ref-card glass-panel">
             <div className="ref-card-top">
-              <span className="ref-name mono">{r.system}</span>
+              <span className="ref-name mono">
+                <Link href={systemHref(r.system)}>{r.system}</Link>
+              </span>
               <span className="ref-glass mono">
                 {typeof r.glass_score === 'number' ? r.glass_score.toFixed(2) : '—'}
               </span>

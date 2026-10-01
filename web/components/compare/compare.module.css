@@ -1,0 +1,153 @@
+/* Compare view. Colours come only from the theme's custom properties. */
+
+.pickers {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.8rem;
+  align-items: end;
+}
+@media (max-width: 640px) {
+  .pickers {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.side {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--cyan);
+}
+.who {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.whoName {
+  font-family: var(--mono);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.metricTable th,
+.metricTable td {
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+.better {
+  font-weight: 700;
+}
+/* On a phone the four numeric columns have to fit without scrolling: the system names
+   are already in the pickers above, so the header keeps only "A" / "B", and the
+   "Better" column (already carried by the bold value and the signed delta) is dropped. */
+@media (max-width: 640px) {
+  .metricTable {
+    font-size: 0.82rem;
+  }
+  .metricTable th,
+  .metricTable td {
+    padding-left: 0.3rem;
+    padding-right: 0.3rem;
+  }
+  .headName,
+  .verdictCol {
+    display: none;
+  }
+}
+.deltaGood {
+  color: var(--good);
+}
+.deltaBad {
+  color: var(--danger);
+}
+.verdict {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.tally {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.7rem;
+  margin: 0 0 1.1rem;
+  padding: 0;
+  list-style: none;
+}
+.tally li {
+  padding: 0.75rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--glass-bg-2);
+}
+.tallyN {
+  display: block;
+  font-family: var(--mono);
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.tallyLabel {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.diffs {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.diff {
+  padding: 0.85rem 0.2rem;
+  border-top: 1px solid var(--border);
+}
+.diffTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+}
+.diffId {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--cyan);
+  overflow-wrap: anywhere;
+}
+.diffQuery {
+  margin: 0.25rem 0 0.55rem;
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+@media (max-width: 640px) {
+  .pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.pairSide {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.5rem;
+  min-width: 0;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--glass-bg-2);
+  font-size: 0.84rem;
+}
+.pairName {
+  font-family: var(--mono);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.conf {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+}

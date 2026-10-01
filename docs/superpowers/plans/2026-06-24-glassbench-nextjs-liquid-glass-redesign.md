@@ -63,6 +63,8 @@ glassbench/web/
 
 Data source: `glassbench/site/dist/leaderboard.json` is copied to `web/data/leaderboard.json` by an npm `predev`/`prebuild` step so the web build never reaches outside its own dir at runtime, and the scorer pipeline is the only writer.
 
+> **Update (Phase 9.3 done):** `site/` is retired. The scorer pipeline now writes `results/leaderboard.json` (`scripts/gen_leaderboard.py --json`, byte-identical to what `site/build_site.py` emitted) and `results/item_results.json` (`scripts/export_results.py`); `web/scripts/sync-data.mjs` copies from `results/`. The routes below were later extended with `/systems`, `/explore`, `/compare`, `/data` and static JSON endpoints — see `web/README.md`.
+
 ---
 
 ## Phase 0 — Scaffold
@@ -478,8 +480,9 @@ export function GlassPanel({ children, className='' }: { children: React.ReactNo
 
 ### Task 9.3: Retire old site
 
-- [ ] **Step 1:** Once deployed and verified, remove `site/build_site.py`, `site/dist/`, `site/nginx.conf`, `site/README.md` (keep `leaderboard.json` generation in the scorer). Update root `README.md` site section to point at `web/`.
-- [ ] **Step 2: Commit** `chore: retire Python static site in favor of Next.js web/`
+- [x] **Step 1:** Once deployed and verified, remove `site/build_site.py`, `site/dist/`, `site/nginx.conf`, `site/README.md` (keep `leaderboard.json` generation in the scorer). Update root `README.md` site section to point at `web/`.
+  - Done. `leaderboard.json` generation moved to `scripts/gen_leaderboard.py --json` → `results/leaderboard.json` first (proved byte-identical to the old output), then `site/` and the root `Dockerfile` / `.dockerignore` (which only built and served that site) were removed.
+- [x] **Step 2: Commit** `chore: retire Python static site in favor of Next.js web/`
 
 ---
 
