@@ -33,7 +33,10 @@ export function Reveal({
           }
         })
       },
-      { rootMargin: '0px 0px -8% 0px', threshold: 0.1 },
+      // threshold 0, not a fraction: a block much taller than the viewport (the datasheet
+      // body is ~9× the screen) can never have 10% of itself on screen, so a fractional
+      // threshold left it invisible until the 3.5s safety net fired.
+      { rootMargin: '0px 0px -8% 0px', threshold: 0 },
     )
     io.observe(el)
     const safety = window.setTimeout(() => el.classList.add('is-in'), 3500)
