@@ -18,7 +18,7 @@ PIP     := $(PYTHON) -m pip
 EXAMPLE ?= submissions/agent_llm/predictions.json
 
 .DEFAULT_GOAL := help
-.PHONY: help install data score validate leaderboard board score-all test all
+.PHONY: help install data score validate leaderboard board results check web-data score-all test all
 
 help:  ## Show this help.
 	@echo "GlassBench make targets:"
@@ -26,8 +26,11 @@ help:  ## Show this help.
 	@echo "  data         Rebuild data/glassbench_v0.1.jsonl from the LongMemEval source."
 	@echo "  score        Score one submission (default: $(EXAMPLE))."
 	@echo "  validate     Validate a submission's predictions.json against the contract."
-	@echo "  leaderboard  Regenerate LEADERBOARD.md from submissions/ (deterministic)."
+	@echo "  leaderboard  Regenerate LEADERBOARD.md + results/*.json from submissions/ (deterministic)."
 	@echo "  board        Alias for leaderboard."
+	@echo "  results      Alias for leaderboard."
+	@echo "  check        Verify every generated artifact is byte-stable (what CI enforces)."
+	@echo "  web-data     leaderboard, then refresh the site's snapshot in web/data/ (needs node)."
 	@echo "  score-all    Re-score every submissions/*/predictions.json (raw board data)."
 	@echo "  test         Run the test suite (pytest)."
 	@echo "  all          install -> test -> score."
@@ -46,10 +49,26 @@ score:  ## Score a single submission's predictions.json.
 validate:  ## Validate a submission's predictions.json against the contract.
 	$(PYTHON) scripts/validate_submission.py "$(EXAMPLE)"
 
-leaderboard:  ## Regenerate LEADERBOARD.md from submissions/ (deterministic).
+# One pipeline, three artifacts, all re-scored from submissions/ by the frozen scorer:
+#   LEADERBOARD.md             the human-readable board
+#   results/leaderboard.json   the same board as data (read by the site in web/)
+#   results/item_results.json  per-item outcomes for every system (read by the site)
+leaderboard:  ## Regenerate LEADERBOARD.md + results/*.json from submissions/ (deterministic).
 	$(PYTHON) scripts/gen_leaderboard.py
+	$(PYTHON) scripts/gen_leaderboard.py --json
+	$(PYTHON) scripts/export_results.py
 
 board: leaderboard  ## Alias for the leaderboard target.
+
+results: leaderboard  ## Alias for the leaderboard target.
+
+check:  ## Verify every generated artifact is byte-stable; writes nothing (what CI enforces).
+	$(PYTHON) scripts/gen_leaderboard.py --check
+	$(PYTHON) scripts/gen_leaderboard.py --json --check
+	$(PYTHON) scripts/export_results.py --check
+
+web-data: leaderboard  ## Refresh the site's committed data snapshot (web/data/).
+	cd web && node scripts/sync-data.mjs
 
 score-all:  ## Re-score all submissions/*/predictions.json (raw board source data).
 	@for f in submissions/*/predictions.json; do \
