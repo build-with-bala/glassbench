@@ -5,10 +5,7 @@ import { test, expect, type Locator, type Page } from '@playwright/test'
  * both projects (1440 desktop, 390 mobile).
  *
  * Controls are operated from the keyboard (focus, then Enter or Space) rather than by
- * pointer. That is deliberate twice over: it proves every control on these pages is
- * keyboard-operable, and it keeps the suite independent of pointer hit-testing, which
- * is unreliable at 390px while the top nav overflows the viewport (see the fixme at the
- * bottom of this file). */
+ * pointer: it proves every control on these pages is keyboard-operable. */
 
 const ITEM = 'gb-stale-07741c44' // gold: "under my bed"
 const UNANSWERABLE = 'gb-contradiction-07741c44' // gold: ABSTAIN
@@ -367,7 +364,11 @@ test.describe('site hygiene', () => {
   test('long documents are visible straight away, not after a reveal timeout', async ({ page }) => {
     await page.goto('/datasheet')
     // The datasheet body is many screens tall; it used to stay at opacity 0 for 3.5s.
-    await expect(page.locator('.datasheet-body')).toHaveClass(/is-in/, { timeout: 1500 })
+    // At phone width the head and contents list push it below the fold, so bring it
+    // into view first: the reveal fires on intersection, not on load.
+    const body = page.locator('.datasheet-body')
+    await body.evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 100))
+    await expect(body).toHaveClass(/is-in/, { timeout: 1500 })
     await expect(page.getByRole('heading', { name: '1. At a glance' })).toBeVisible()
   })
 
@@ -382,15 +383,8 @@ test.describe('site hygiene', () => {
   })
 })
 
-/* A known defect, recorded here so it is not lost — and not something this file's pages
- * can fix. The top nav (`.site-nav` / `.nav-links` in app/globals.css) neither wraps nor
- * scrolls, so at phone width its links run off the right edge and the whole document
- * becomes wider than the viewport: 566px at a 390px viewport before this branch (four
- * links), about 700px with the two links added here. On a phone the browser then zooms
- * the page out to fit. `<main>` itself lays out at exactly 390px on every platform
- * route (routes.spec.ts asserts that). The fix is nav styling — wrap, scroll or a menu
- * below ~760px. Remove `fixme` once the nav fits. */
-test.fixme('the document is no wider than the viewport at phone width (blocked on nav styling)', async ({ page }) => {
+/* The top nav scrolls its links instead of widening the page; guard that at phone width. */
+test('the document is no wider than the viewport at phone width', async ({ page }) => {
   await page.goto('/explore')
   const width = await page.evaluate(() => document.documentElement.scrollWidth)
   expect(width).toBeLessThanOrEqual(page.viewportSize()!.width)

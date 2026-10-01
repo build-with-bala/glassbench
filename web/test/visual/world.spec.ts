@@ -79,7 +79,7 @@ test('world morphs per route and never intercepts DOM clicks', async ({ page }) 
   // same canvas, still mounted: the world persists across routes
   await expect(world.locator('canvas')).toHaveCount(1)
 
-  await page.locator('nav').getByRole('link', { name: 'Datasheet', exact: true }).click()
+  await page.locator('nav.site-nav').getByRole('link', { name: 'Datasheet', exact: true }).click()
   await expect(page).toHaveURL(/datasheet/)
   await expect(world).toHaveAttribute('data-scene', 'card')
 })
