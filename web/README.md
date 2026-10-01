@@ -1,6 +1,6 @@
 # GlassBench — web
 
-The Next.js liquid-glass site for GlassBench. A full-WebGL refractive-glass world
+The Next.js site for GlassBench. A real-time WebGL board of frosted-glass slabs sits
 behind a multi-page app, co-equal light/dark, reading the scorer's `leaderboard.json`
 as the single source of truth.
 
@@ -23,6 +23,24 @@ The Python scorer is the source of truth. `scripts/sync-data.mjs` (run by
 into `data/` — a committed snapshot so the Docker build is self-contained. When the
 scorer dirs aren't present (e.g. a `web/`-context Docker build) it falls back to the
 snapshot. Numbers are never hand-edited.
+
+## World
+`components/world/` draws one slab per benchmark item (counts come from
+`split_counts`, passed down from the layout): answerable slabs can be lit from inside,
+stale slabs carry a floating upper layer, contradiction slabs sit sunk, false-premise
+slabs stay dark. `board.ts` is the pure layout, `slabGeometry.ts` the squircle mesh,
+`slabMaterial.ts` the frosted-glass shader, `useSceneRoute.ts` the per-route variation
+(unknown routes get the calm scene). Three tiers: full (bloom, hover, parallax),
+reduced (coarse pointers, no post-processing), and a still poster for reduced motion
+or save-data.
+
+The posters, the social card and the touch icon are screenshots of that scene. After
+changing the world or its palette, regenerate them with the site running:
+```bash
+node scripts/capture-world.mjs   # public/poster-*.jpg, app/opengraph-image.jpg, app/apple-icon.png
+```
+The palette in `slabMaterial.ts` must track the tokens in `app/globals.css` (`--bg`
+in particular, or the canvas shows a seam).
 
 ## Test
 ```bash
