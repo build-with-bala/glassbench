@@ -1,8 +1,14 @@
 import { GlassPanel } from '../../components/ui/GlassPanel'
 import { Reveal } from '../../components/motion/Reveal'
 import { getDatasheetHtml } from '../../lib/datasheet'
+import { pageMetadata } from '../../lib/metadata'
 
-export const metadata = { title: 'Datasheet' }
+export const metadata = pageMetadata({
+  title: 'Datasheet',
+  description:
+    'The GlassBench dataset card: what the data is, where it comes from, exactly how each split was built, and what it does not support.',
+  path: '/datasheet',
+})
 
 export default function DatasheetPage() {
   const { html, toc } = getDatasheetHtml()

@@ -1,0 +1,275 @@
+/* System pages. Colours come only from the theme's custom properties. */
+
+/* ---- metric tiles -------------------------------------------------------- */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(172px, 1fr));
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.9rem 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--glass-bg-2);
+  text-align: center;
+}
+.tileValue {
+  font-family: var(--mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  padding: 0.05rem 0.45rem;
+  border-radius: 8px;
+}
+.tilePrimary .tileValue {
+  font-size: 1.9rem;
+}
+.tileHint {
+  color: var(--faint);
+  font-size: 0.72rem;
+}
+.tileFlag {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+/* One tile per row on a phone: the metric tooltip is centred on its label, so the label
+   has to sit near the middle of the viewport for the tooltip to fit. */
+@media (max-width: 560px) {
+  .tiles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tile {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3rem 0.9rem;
+    padding: 0.7rem 0.6rem;
+  }
+  .tileValue,
+  .tilePrimary .tileValue {
+    font-size: 1.25rem;
+  }
+}
+
+/* ---- outcome distribution bar ------------------------------------------- */
+.bar {
+  display: flex;
+  width: 100%;
+  height: 1.1rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--glass-bg-2);
+}
+.seg {
+  min-width: 0;
+  height: 100%;
+}
+.seg + .seg {
+  border-left: 1px solid var(--bg);
+}
+.segCorrect {
+  background: var(--good);
+}
+.segAbstainedOk {
+  background: color-mix(in srgb, var(--good) 45%, transparent);
+}
+.segWrong {
+  background: var(--warn);
+}
+.segConfidentlyWrong {
+  background: var(--danger);
+}
+.segAbstainedMissed {
+  background: color-mix(in srgb, var(--muted) 40%, transparent);
+}
+.barWrap > * + * {
+  margin-top: 0.7rem;
+}
+
+/* ---- glass score decomposition ------------------------------------------ */
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.92rem;
+}
+.steps li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.3rem 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.steps li:last-child {
+  border-bottom: 0;
+}
+.stepOp {
+  display: inline-block;
+  width: 1.4rem;
+  color: var(--faint);
+  font-family: var(--mono);
+}
+.stepValue {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.stepResult {
+  color: var(--cyan);
+  font-weight: 700;
+}
+.stepResult .stepValue {
+  font-size: 1.15rem;
+}
+
+/* ---- per-split table ----------------------------------------------------- */
+.splitTable.splitTable thead th {
+  white-space: normal;
+  max-width: 7.5rem;
+  vertical-align: bottom;
+  line-height: 1.3;
+}
+.splitTable .rateKind {
+  display: block;
+  color: var(--faint);
+  font-size: 0.7rem;
+}
+
+/* ---- rank context -------------------------------------------------------- */
+.rankList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.92rem;
+}
+.rankList li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.3rem 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.rankList li:last-child {
+  border-bottom: 0;
+}
+.rankSelf {
+  font-weight: 700;
+}
+
+/* ---- per-item list ------------------------------------------------------- */
+.items {
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.35rem 1rem;
+  align-items: center;
+  padding: 0.7rem 0.2rem;
+  border-top: 1px solid var(--border);
+}
+.itemMain {
+  min-width: 0;
+}
+.itemId {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--cyan);
+  overflow-wrap: anywhere;
+}
+.itemQuery {
+  margin: 0.15rem 0 0;
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+.itemMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem 0.5rem;
+}
+.conf {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .itemMeta {
+    justify-content: flex-start;
+  }
+}
+
+/* ---- system index cards -------------------------------------------------- */
+.sysCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  height: 100%;
+  padding: clamp(1rem, 3vw, 1.4rem);
+}
+.sysCardRef {
+  border-style: dashed;
+}
+.sysTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.3rem 0.8rem;
+}
+.sysName {
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.sysScore {
+  font-family: var(--mono);
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.sysDesc {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.sysStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--faint);
+}
+.sysStats b {
+  color: var(--ink);
+}
+.sysFoot {
+  margin-top: auto;
+}

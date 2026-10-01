@@ -1,8 +1,18 @@
+import Link from 'next/link'
 import { GlassPanel } from '../../components/ui/GlassPanel'
 import { Reveal } from '../../components/motion/Reveal'
 import { CopyButton } from '../../components/ui/CopyButton'
+import { PredictionsChecker } from '../../components/submit/PredictionsChecker'
+import { getValidationContext } from '../../lib/validation-context'
+import { pageMetadata } from '../../lib/metadata'
+import ui from '../../components/platform/ui.module.css'
 
-export const metadata = { title: 'Submit' }
+export const metadata = pageMetadata({
+  title: 'Submit',
+  description:
+    'Submit a system to GlassBench in five steps, and check your predictions.json in the browser against the submission contract before you open a pull request.',
+  path: '/submit',
+})
 
 interface Step {
   no: number
@@ -30,7 +40,7 @@ const STEPS: Step[] = [
     no: 3,
     title: 'Validate',
     code: 'python scripts/validate_submission.py submissions/<system>/predictions.json',
-    note: 'Catches duplicate ids and malformed rows before you score.',
+    note: 'Catches duplicate ids, unknown ids, out-of-range confidences and malformed rows before you score. The checker below runs the same rules in your browser.',
   },
   {
     no: 4,
@@ -42,7 +52,7 @@ const STEPS: Step[] = [
     no: 5,
     title: 'Open a PR',
     code: 'submissions/<system>/{predictions.json, system.md}',
-    note: 'CI runs the scorer; a maintainer merges when green. Folder name (short, lowercase) becomes the leaderboard row.',
+    note: 'CI runs the validator and the scorer; a maintainer merges when green. Folder name (short, lowercase) becomes the leaderboard row.',
   },
 ]
 
@@ -76,25 +86,46 @@ export default function SubmitPage() {
 
       <ol className="submit-steps" style={{ listStyle: 'none', margin: '1.4rem 0 0', padding: 0 }}>
         {STEPS.map((step, idx) => (
-          <Reveal key={step.no} delay={idx * 60}>
-            <GlassPanel className="submit-step">
-              <div className="submit-step-inner">
-                <div className="step-no mono" aria-hidden="true">
-                  {String(step.no).padStart(2, '0')}
-                </div>
-                <div className="step-content">
-                  <h2 className="step-title">{step.title}</h2>
-                  <div className="step-cmd">
-                    <code className="mono">{step.code}</code>
-                    <CopyButton text={step.code} />
+          <li key={step.no}>
+            <Reveal delay={idx * 60}>
+              <GlassPanel className="submit-step">
+                <div className="submit-step-inner">
+                  <div className="step-no mono" aria-hidden="true">
+                    {String(step.no).padStart(2, '0')}
                   </div>
-                  <p className="step-note">{step.note}</p>
+                  <div className="step-content">
+                    <h2 className="step-title">{step.title}</h2>
+                    <div className="step-cmd">
+                      <code className="mono">{step.code}</code>
+                      <CopyButton text={step.code} />
+                    </div>
+                    <p className="step-note">{step.note}</p>
+                  </div>
                 </div>
-              </div>
-            </GlassPanel>
-          </Reveal>
+              </GlassPanel>
+            </Reveal>
+          </li>
         ))}
       </ol>
+
+      <section id="check" aria-labelledby="check-h" style={{ marginTop: '1.4rem', scrollMarginTop: '5rem' }}>
+        <GlassPanel className={ui.card}>
+          <h2 id="check-h" className="step-title">
+            Check your predictions.json
+          </h2>
+          <p className={ui.cardSub}>
+            The same contract checks as <code className="mono">scripts/validate_submission.py</code> — JSON shape,
+            row shape, confidence range, duplicate ids, ids that are not in v0.1, gold-label leakage and coverage —
+            run in your browser. It validates; it does not score. Scores come only from the Python scorer (step 4),
+            and submissions are still made by pull request (step 5). Want the numbers other systems got? See{' '}
+            <Link className={ui.link} href="/data">
+              data &amp; API
+            </Link>
+            .
+          </p>
+          <PredictionsChecker context={getValidationContext()} />
+        </GlassPanel>
+      </section>
 
       <Reveal delay={120}>
         <GlassPanel className="submit-cite">

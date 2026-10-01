@@ -1,8 +1,11 @@
 'use client'
 
 import { Fragment, useMemo, useState } from 'react'
+import Link from 'next/link'
 import type { Metric, RankedRow } from '../../lib/types'
 import { goodness, rampTint } from '../../lib/color-ramp'
+import { formatMetric } from '../../lib/format'
+import { systemHref } from '../../lib/routes'
 import { CountUp } from '../ui/CountUp'
 import { CopyButton } from '../ui/CopyButton'
 import { MetricTip } from '../ui/MetricTip'
@@ -15,12 +18,11 @@ interface Props {
   headlineKey: string
 }
 
-const fmt = (v: unknown, key: string): string => {
-  if (typeof v !== 'number') return '—'
-  if (key === 'glass_score') return v.toFixed(2)
-  if (key === 'answered' || key === 'abstained') return String(v)
-  return v.toFixed(3)
-}
+// Each metric is printed at the precision the scorer pipeline published it at (see
+// lib/format.ts) — abstention recall is 0.92, not 0.920.
+const fmt = (v: unknown, key: string): string => formatMetric(key, v)
+
+const isActivate = (key: string) => key === 'Enter' || key === ' '
 
 export function LeaderboardTable({ rows, metrics, ranges, primaryKey, headlineKey }: Props) {
   const [sortKey, setSortKey] = useState<string>(primaryKey)
@@ -50,6 +52,14 @@ export function LeaderboardTable({ rows, metrics, ranges, primaryKey, headlineKe
                   key={m.key}
                   className={`col-metric ${m.key === headlineKey ? 'is-headline' : ''} ${sortKey === m.key ? 'is-sorted' : ''}`}
                   onClick={() => setSortKey(m.key)}
+                  onKeyDown={(e) => {
+                    // The metric name inside is focusable; Enter/Space on it sorts.
+                    if (isActivate(e.key)) {
+                      e.preventDefault()
+                      setSortKey(m.key)
+                    }
+                  }}
+                  aria-sort={sortKey === m.key ? (m.direction === 'lower' ? 'ascending' : 'descending') : 'none'}
                   title={`Sort by ${m.label}`}
                 >
                   <MetricTip label={m.label} tip={m.tooltip} />
@@ -69,10 +79,31 @@ export function LeaderboardTable({ rows, metrics, ranges, primaryKey, headlineKe
                     className={`lb-row ${isOpen ? 'is-open' : ''}`}
                     onClick={() => setExpanded(isOpen ? null : row.system)}
                   >
-                    <td className="col-rank mono">{i + 1}</td>
+                    {/* The official rank (ties share one) while the board is in ranking order;
+                        the row's position once it is re-sorted by another metric. */}
+                    <td className="col-rank mono">{sortKey === primaryKey ? row.rank : i + 1}</td>
                     <td className="col-system">
-                      <span className="sys-name mono">{row.system}</span>
+                      <span className="sys-name mono">
+                        <Link href={systemHref(row.system)} onClick={(e) => e.stopPropagation()}>
+                          {row.system}
+                        </Link>
+                      </span>
                       <span className="sys-type">{row.type}</span>
+                      {/* The whole row toggles on click; this is the same toggle for keyboard
+                          and screen-reader users. */}
+                      <button
+                        type="button"
+                        className="row-toggle"
+                        aria-expanded={isOpen}
+                        aria-controls={`lb-detail-${row.system}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setExpanded(isOpen ? null : row.system)
+                        }}
+                      >
+                        {isOpen ? 'hide details' : 'details'}
+                        <span className="sr-only"> for {row.system}</span>
+                      </button>
                     </td>
                     {metrics.map((m) => {
                       const v = row[m.key] as number
@@ -93,7 +124,7 @@ export function LeaderboardTable({ rows, metrics, ranges, primaryKey, headlineKe
                     })}
                   </tr>
                   {isOpen && (
-                    <tr className="lb-detail">
+                    <tr className="lb-detail" id={`lb-detail-${row.system}`}>
                       <td colSpan={metrics.length + 2}>
                         <div className="detail-grid">
                           <p className="detail-desc">{row.description}</p>
@@ -105,6 +136,10 @@ export function LeaderboardTable({ rows, metrics, ranges, primaryKey, headlineKe
                               <code className="mono">{row.reproduce}</code>
                               <CopyButton text={row.reproduce} />
                             </div>
+                            <Link href={systemHref(row.system)}>
+                              Full system page: per-split breakdown and per-item outcomes{' '}
+                              <span aria-hidden="true">→</span>
+                            </Link>
                           </div>
                         </div>
                       </td>
@@ -116,7 +151,9 @@ export function LeaderboardTable({ rows, metrics, ranges, primaryKey, headlineKe
           </tbody>
         </table>
       </div>
-      <p className="lb-hint">Click a column to sort · click a row for details</p>
+      <p className="lb-hint">
+        Click a column to sort · click a row for details · open a system’s name for its page
+      </p>
 
       <style jsx>{`
         .lb-wrap {
@@ -215,6 +252,32 @@ export function LeaderboardTable({ rows, metrics, ranges, primaryKey, headlineKe
         td.tint-danger {
           color: var(--danger);
           background: var(--tint-danger);
+        }
+        .row-toggle {
+          margin-top: 0.35rem;
+          padding: 0.1rem 0.5rem;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          background: transparent;
+          color: var(--muted);
+          font-family: var(--mono);
+          font-size: 0.7rem;
+          cursor: pointer;
+        }
+        .row-toggle:hover {
+          color: var(--ink);
+          border-color: var(--cyan);
+        }
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          margin: -1px;
+          padding: 0;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
         }
         .lb-detail td {
           padding: 0 1rem 1.1rem;

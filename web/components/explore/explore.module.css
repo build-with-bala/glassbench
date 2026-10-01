@@ -1,0 +1,255 @@
+/* Item explorer + item pages. Colours come only from the theme's custom properties. */
+
+/* ---- list of items ------------------------------------------------------- */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem 1.2rem;
+  align-items: center;
+  padding: 0.85rem 0.2rem;
+  border-top: 1px solid var(--border);
+}
+.rowMain {
+  min-width: 0;
+}
+.rowTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+}
+.rowId {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--cyan);
+  overflow-wrap: anywhere;
+}
+.rowQuery {
+  margin: 0.25rem 0 0;
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 720px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.order {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.9rem;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: sys;
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.order li {
+  counter-increment: sys;
+}
+.order li::before {
+  content: counter(sys) ' ';
+  color: var(--faint);
+}
+.orderActive {
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  margin-top: 1rem;
+}
+
+.keyBlock > * + * {
+  margin-top: 0.7rem;
+}
+
+/* ---- item page ----------------------------------------------------------- */
+.outcomes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.outcomes li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+  padding: 0.7rem 0.2rem;
+  border-top: 1px solid var(--border);
+}
+.outcomeWho {
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.outcomeWhat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.8rem;
+}
+
+.query {
+  margin: 0;
+  font-size: clamp(1.15rem, 3.2vw, 1.5rem);
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+}
+
+.answer {
+  margin: 0.3rem 0 0;
+  padding: 0.55rem 0.75rem;
+  border-left: 3px solid var(--border);
+  border-radius: 0 8px 8px 0;
+  background: var(--glass-bg-2);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.gold {
+  border-left-color: var(--cyan);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.revealGrid > * + * {
+  margin-top: 1.1rem;
+}
+/* Focus lands here after "reveal"; give the ring room instead of hugging the text. */
+.revealGrid:focus-visible {
+  outline-offset: 10px;
+  border-radius: 6px;
+}
+.revealHead {
+  margin: 0 0 0.35rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.spans {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.spans li + li {
+  margin-top: 0.4rem;
+}
+.answers {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.answers li {
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--border);
+}
+.answers li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.answerHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.6rem;
+}
+
+/* ---- conversation history ------------------------------------------------ */
+.session + .session {
+  margin-top: 1.4rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+}
+.sessionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.7rem;
+  margin: 0 0 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.turns {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.turns li + li {
+  margin-top: 0.55rem;
+}
+.turn {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--glass-bg-2);
+}
+.turnUser {
+  border-left: 3px solid var(--cyan);
+}
+.role {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.content {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.assistant summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.assistant summary:hover {
+  color: var(--ink);
+}
+.assistant[open] summary {
+  margin-bottom: 0.5rem;
+}
+.assistant[open] .preview {
+  display: none;
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+}
