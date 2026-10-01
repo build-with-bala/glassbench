@@ -5,4 +5,15 @@ export const SITE_NAME = 'GlassBench'
 export const SITE_TAGLINE = 'does it know when it didn’t?'
 export const REPO_URL = 'https://github.com/build-with-bala/glassbench'
 
-export const ROUTES = ['/', '/leaderboard', '/datasheet', '/submit'] as const
+/** The indexable, static top-level routes (the sitemap adds one page per system).
+ *  Item pages (/explore/<id>) are deliberately absent: they are noindex. */
+export const ROUTES = [
+  '/',
+  '/leaderboard',
+  '/systems',
+  '/explore',
+  '/compare',
+  '/datasheet',
+  '/submit',
+  '/data',
+] as const
