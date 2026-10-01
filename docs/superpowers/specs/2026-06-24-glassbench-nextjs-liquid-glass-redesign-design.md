@@ -156,4 +156,24 @@ fetching — `leaderboard.json` is read at build.
   **retire `site/build_site.py`, `site/dist/`, `site/nginx.conf`** (replaced by the
   Next.js node service on Coolify). `leaderboard.json` generation stays in the scorer
   pipeline; the path it's read from is the only coupling between scorer and web.
+- **Done.** `site/` is removed. The scorer pipeline writes `results/leaderboard.json` and
+  `results/item_results.json`; `web/scripts/sync-data.mjs` snapshots them (and the frozen
+  item file) into `web/data/`. That directory is the only coupling between scorer and web.
+
+---
+
+## 11. Addendum — the platform routes
+
+Built after this spec, within its rules (§4: the site performs no scoring; §9: submissions
+stay a GitHub-PR flow, no in-browser scoring):
+
+- `/systems/[system]`, `/explore` + `/explore/[id]`, `/compare`, `/data`, and static JSON
+  endpoints under `/api/`. All read `results/*.json`; none computes a score.
+- `/submit` gained an in-browser `predictions.json` **validator** — a port of
+  `scripts/validate_submission.py`, held to it by a generated parity fixture. It
+  validates only.
+- Item pages are `noindex`, absent from the sitemap, and fetch the gold answer only on an
+  explicit reveal, so the site is not an easy contamination source.
+
+See `web/README.md` for the current route list and data flow.
 ```

@@ -91,7 +91,22 @@ A minimal, valid file lives at
 [`submissions/EXAMPLE/predictions.json`](submissions/EXAMPLE/predictions.json) — copy
 its shape.
 
-### Step 3 — score locally
+### Step 3 — validate, then score locally
+
+Check the file against the contract first:
+
+```bash
+python scripts/validate_submission.py submissions/<your_system>/predictions.json
+```
+
+It exits non-zero and lists every violation by row (duplicate ids, ids that are not in
+v0.1, confidences outside `[0, 1]`, malformed rows, label fields copied into a
+prediction). Omitted ids are only a warning — they are scored as abstentions. The same
+rules run in your browser on the site's
+[submit page](https://glassbench.buildwithbala.in/submit#check) if you would rather drop
+the file there; that checker validates and never scores.
+
+Then score it:
 
 ```bash
 python -m glassbench.score --predictions submissions/<your_system>/predictions.json
@@ -117,25 +132,19 @@ submissions/<your_system>/
 where the `confidence` number comes from, and any seeds or decoding settings needed to
 reproduce the run. Honest, brief descriptions are the norm.
 
-> **Naming:** use a short, lowercase, hyphenless folder name (e.g. `mem0`, `letta`,
-> `longctx-128k`). The folder name is the leaderboard row name.
-
-> **Note on `.gitignore`:** `predictions.json` files are git-ignored by default to keep
-> bulky generated output out of unrelated PRs. When you `git add` your submission,
-> force it in:
->
-> ```bash
-> git add -f submissions/<your_system>/predictions.json submissions/<your_system>/system.md
-> ```
+> **Naming:** use a short, lowercase folder name made of letters, digits, `_` or `-`
+> (e.g. `mem0`, `letta`, `longctx_128k`). The folder name is the leaderboard row name and
+> the address of your system's page on the site (`/systems/<your_system>`).
 
 ### Step 5 — open a pull request
 
 1. Branch from the default branch; never push to it directly.
 2. Commit only your `submissions/<your_system>/` folder (plus a leaderboard row if you
    choose to add one — a maintainer can also do this).
-3. Open the PR. **CI runs the scorer on your changed submission** and posts the six
-   components + Glass Score. A maintainer merges once CI is green and the `system.md`
-   is filled in.
+3. Open the PR. **CI validates and scores your changed submission**: it runs
+   `scripts/validate_submission.py`, checks that `system.md` is there, then runs the
+   scorer and prints the six components + Glass Score in the job log. A maintainer
+   merges once CI is green and the `system.md` is filled in.
 
 No system is privileged. The authors' own system is intentionally **not** on the board
 until external entries exist — see the README.
@@ -147,7 +156,8 @@ until external entries exist — see the README.
 A submission is rejected if it:
 
 - reads `gold_answer` (or any label field) at inference time;
-- contains duplicate `id`s, or ids not present in the scored data version;
+- contains duplicate `id`s, ids that are not strings, or ids not present in the scored
+  data version;
 - has any `confidence` outside `[0, 1]`;
 - is not a JSON array of the two allowed per-item shapes;
 - is missing `system.md`, or `system.md` is a non-description placeholder.
@@ -155,6 +165,58 @@ A submission is rejected if it:
 Abstaining everywhere (Glass Score collapses on `answerable`/`stale`) or answering
 everywhere (collapses on the unanswerable splits) is *allowed* — those are honest
 baselines and welcome — but they will not score well, by design.
+
+---
+
+## After a submission is merged (maintainers)
+
+Every published number comes from one pipeline run over `submissions/`. Regenerate the
+artifacts and the site's snapshot together, and commit them in one change:
+
+```bash
+make web-data     # = make leaderboard + make fixtures + refresh web/data/
+```
+
+That rewrites, deterministically:
+
+| File | Written by |
+|---|---|
+| `LEADERBOARD.md` | `scripts/gen_leaderboard.py` |
+| `results/leaderboard.json` | `scripts/gen_leaderboard.py --json` |
+| `results/item_results.json` | `scripts/export_results.py` |
+| `web/data/*` | `web/scripts/sync-data.mjs` (a byte-for-byte copy of the above + the frozen data) |
+
+`make check` verifies all of it without writing, and CI fails on any drift — a stale
+`LEADERBOARD.md`, a stale `results/*.json`, or a `web/data/` snapshot that no longer
+matches the pipeline. Nothing in `results/` or `web/data/` is ever edited by hand.
+
+A new system's leaderboard blurb (`type`, `description`, `reproduce`) is read from the
+`- **Type:**` and `- **One-line description:**` bullets of its `system.md`; to curate it,
+add an entry to `_JSON_SYSTEM_META` in `scripts/gen_leaderboard.py`. If the leaderboard's
+"Honest reading" prose should mention the new system, edit the static blocks in the same
+script — never `LEADERBOARD.md` itself.
+
+Pushing to the deployed branch redeploys the site (Coolify's own webhook). CI only
+verifies; it holds no deploy credentials and must not be given any.
+
+---
+
+## Working on the site
+
+The site in [`web/`](web/) is presentation: it reads `results/*.json` and the frozen data
+and **must never compute, round or re-derive a score** — if a page needs a number the
+pipeline does not publish, add it to the pipeline (with a test that ties it to the
+scorer), not to the page. See [`web/README.md`](web/README.md) for setup, the data flow
+and the test commands. Two rules that are easy to break by accident:
+
+- **The in-browser `predictions.json` checker is a port of
+  `scripts/validate_submission.py`.** If you change a validator rule, change
+  `web/lib/validate-predictions.ts` to match and run `make fixtures`; the site's unit
+  tests compare the two on a fixed set of files and CI rejects a stale fixture.
+- **Gold answers stay out of crawled HTML.** Item pages are `noindex`, are not in the
+  sitemap, and load the gold answer only when a reader presses "reveal". Do not render
+  `gold_answer`, `evidence_spans` or `answer_topic` into a page, and do not add them to
+  the bulk JSON endpoints.
 
 ---
 
@@ -175,6 +237,10 @@ The scorer is deterministic by contract: fixed seeds, bias-corrected ECE, equal-
 bins. Any PR touching `glassbench/score.py`, `glassbench/match.py`, or
 `glassbench/calib.py` must keep two runs byte-identical and must not alter `v0.1`
 numbers unless it is an explicit, documented `v0.2`.
+
+Tooling around the scorer — `glassbench/results.py`, everything in `scripts/`, the site —
+may change freely as long as `make check` and the test suite stay green: those gates are
+what prove a tooling change did not move a number.
 
 ---
 
