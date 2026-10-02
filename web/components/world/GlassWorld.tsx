@@ -76,7 +76,7 @@ export function GlassWorld({ data }: { data: BoardData }) {
         <Canvas
           className="world-canvas"
           flat
-          dpr={quality === 'reduced' ? [1, 1.5] : [1, 1.75]}
+          dpr={[1, 1.5]}
           gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }}
           camera={{ fov: 24, position: [-12, 14, 20], near: 1, far: 400 }}
         >

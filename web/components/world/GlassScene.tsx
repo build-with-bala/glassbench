@@ -197,6 +197,8 @@ export function GlassScene({ data, quality }: { data: BoardData; quality: WorldQ
     freeFrame: typeof window !== 'undefined' && (window as unknown as { __boardFrame?: string }).__boardFrame === 'free',
   })
   live.current.themeTarget = resolvedTheme === 'light' ? 1 : 0
+  // until when (clock time) the scene is still moving; the renderer paces itself by it
+  const activity = useRef({ until: 0 })
   live.current.hero = sceneName === 'hero'
 
   const tmp = useMemo(
@@ -435,6 +437,8 @@ export function GlassScene({ data, quality }: { data: BoardData; quality: WorldQ
     /* ---- tell the DOM where each cell is (only when something moved) ---- */
     const rects = boardBridge.rects
     const cam = `${az.toFixed(4)}|${el.toFixed(4)}|${dist.toFixed(3)}|${view}`
+    const moved = dirty || cam !== s.lastCam || s.theme !== prevTheme
+    if (moved) activity.current.until = state.clock.elapsedTime + 0.5
     if (rects && (dirty || cam !== s.lastCam)) {
       s.lastCam = cam
       for (let ci = 0; ci < count; ci++) {
@@ -478,7 +482,7 @@ export function GlassScene({ data, quality }: { data: BoardData; quality: WorldQ
       <mesh geometry={geo.core} material={mats.core} frustumCulled={false} renderOrder={2} />
       <mesh geometry={geo.shell} material={mats.shellBack} frustumCulled={false} renderOrder={3} />
       <mesh geometry={geo.shell} material={mats.shellFront} frustumCulled={false} renderOrder={4} />
-      <Post uniforms={uniforms} bloom={quality === 'full'} />
+      <Post uniforms={uniforms} bloom={quality === 'full'} activity={activity} />
     </>
   )
 }
@@ -487,17 +491,28 @@ export function GlassScene({ data, quality }: { data: BoardData; quality: WorldQ
  *  on every tier, and (desktop) blooms what is brighter than 1.0. Built from three's
  *  own passes — no extra dependency. Takes over the render loop (priority 1) and
  *  falls back to a plain render if a pass ever throws. */
-function Post({ uniforms, bloom }: { uniforms: WorldUniforms; bloom: boolean }) {
+function Post({
+  uniforms,
+  bloom,
+  activity,
+}: {
+  uniforms: WorldUniforms
+  bloom: boolean
+  /** `until`: clock time before which the scene is still moving */
+  activity: { current: { until: number } }
+}) {
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
   const camera = useThree((s) => s.camera)
   const size = useThree((s) => s.size)
   const dpr = useThree((s) => s.viewport.dpr)
   const failed = useRef(false)
+  // dense displays need fewer samples per pixel for the same edge quality
+  const samples = dpr > 1.3 ? 2 : 4
 
   const rig = useMemo(() => {
     try {
-      const target = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: 4 })
+      const target = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples })
       const composer = new EffectComposer(gl, target)
       composer.addPass(new RenderPass(scene, camera))
       const pass = bloom ? new UnrealBloomPass(new THREE.Vector2(256, 256), 0.4, 0.3, 0.8) : null
@@ -507,12 +522,15 @@ function Post({ uniforms, bloom }: { uniforms: WorldUniforms; bloom: boolean }) 
     } catch {
       return null
     }
-  }, [gl, scene, camera, bloom])
+  }, [gl, scene, camera, bloom, samples])
 
   useEffect(() => {
     if (!rig) return
     rig.composer.setPixelRatio(dpr)
     rig.composer.setSize(size.width, size.height)
+    // the halo is soft: its blur chain runs from a quarter of the drawing buffer
+    // (the pass halves what it is given), a quarter of the cost of the default
+    rig.pass?.setSize(Math.round((size.width * dpr) / 2), Math.round((size.height * dpr) / 2))
   }, [rig, size.width, size.height, dpr])
 
   useEffect(
@@ -524,7 +542,15 @@ function Post({ uniforms, bloom }: { uniforms: WorldUniforms; bloom: boolean }) 
     [rig],
   )
 
+  const lastDraw = useRef(-1)
   useFrame((state) => {
+    // The board is ambient: 60 fps while something is moving, 30 when only the embers
+    // flicker. On a 120 Hz display that is a half to a quarter of the GPU work, and a
+    // frame that is skipped simply leaves the last one on screen.
+    const now = state.clock.elapsedTime
+    const interval = activity.current.until > now ? 1 / 60 : 1 / 30
+    if (lastDraw.current >= 0 && now - lastDraw.current < interval - 0.003) return
+    lastDraw.current = now
     if (rig && !failed.current) {
       try {
         if (rig.pass) {
