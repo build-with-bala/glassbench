@@ -7,7 +7,9 @@ import { OUTCOME_KEYS, OUTCOME_STYLE, SPLIT_KEYS, SPLIT_LABEL } from '../../lib/
 import { filterItems } from '../../lib/explore'
 import { DEFAULT_EXPLORE_FILTERS, exploreQuery, parseExploreFilters, type ExploreFilters } from '../../lib/routes'
 import { CopyButton } from '../ui/CopyButton'
+import { Select } from '../ui/Select'
 import { ItemRow, SystemOrder } from './ItemRow'
+import { boardStore } from '../world/store'
 import ui from '../platform/ui.module.css'
 import css from './explore.module.css'
 
@@ -39,6 +41,18 @@ export function ExploreBrowser({ items, systems }: { items: ItemSummary[]; syste
   const isFiltered = exploreQuery(filters) !== ''
   const activeSystem = filters.system !== 'any' ? filters.system : undefined
 
+  // The board mirrors the view: the chosen system's outcomes (plain glass when an
+  // outcome is asked of "any system", since no single system's pattern applies) with
+  // the listed items lit. Pointing at a row singles out its cell.
+  useEffect(() => {
+    boardStore.setBase({
+      system: activeSystem ?? (filters.outcome !== 'all' ? null : undefined),
+      highlight: isFiltered ? { items: shown.map((it) => it.id) } : null,
+    })
+  }, [shown, isFiltered, activeSystem, filters.outcome])
+  useEffect(() => () => boardStore.resetBase(), [])
+  const onRowActive = (id: string | null) => boardStore.setPreview(id ? { focus: id } : null)
+
   const searchId = useId()
   const splitId = useId()
   const outcomeId = useId()
@@ -64,60 +78,51 @@ export function ExploreBrowser({ items, systems }: { items: ItemSummary[]; syste
             onChange={(e) => set({ q: e.target.value })}
           />
         </div>
-        <div className={ui.field}>
-          <label className={ui.label} htmlFor={splitId}>
+        <div className={`${ui.field} ${ui.fieldSelect}`}>
+          <span className={ui.label} id={splitId}>
             Split
-          </label>
-          <select
-            id={splitId}
-            className={ui.select}
+          </span>
+          <Select<Split | 'all'>
+            labelledBy={splitId}
             value={filters.split}
-            onChange={(e) => set({ split: e.target.value as Split | 'all' })}
-          >
-            <option value="all">All splits</option>
-            {SPLIT_KEYS.map((s) => (
-              <option key={s} value={s}>
-                {SPLIT_LABEL[s]}
-              </option>
-            ))}
-          </select>
+            onChange={(split) => set({ split })}
+            options={[
+              { value: 'all', label: 'All splits' },
+              ...SPLIT_KEYS.map((s) => ({ value: s, label: SPLIT_LABEL[s] })),
+            ]}
+          />
         </div>
-        <div className={ui.field}>
-          <label className={ui.label} htmlFor={outcomeId}>
+        <div className={`${ui.field} ${ui.fieldSelect}`}>
+          <span className={ui.label} id={outcomeId}>
             Outcome
-          </label>
-          <select
-            id={outcomeId}
-            className={ui.select}
+          </span>
+          <Select<Outcome | 'all'>
+            labelledBy={outcomeId}
             value={filters.outcome}
-            onChange={(e) => set({ outcome: e.target.value as Outcome | 'all' })}
-          >
-            <option value="all">Any outcome</option>
-            {OUTCOME_KEYS.map((o) => (
-              <option key={o} value={o}>
-                {OUTCOME_STYLE[o].label}
-              </option>
-            ))}
-          </select>
+            onChange={(outcome) => set({ outcome })}
+            options={[
+              { value: 'all', label: 'Any outcome' },
+              ...OUTCOME_KEYS.map((o) => ({ value: o, label: OUTCOME_STYLE[o].label })),
+            ]}
+          />
         </div>
-        <div className={ui.field}>
-          <label className={ui.label} htmlFor={systemId}>
+        <div className={`${ui.field} ${ui.fieldSelect}`}>
+          <span className={ui.label} id={systemId}>
             For system
-          </label>
-          <select
-            id={systemId}
-            className={ui.select}
+          </span>
+          <Select
+            labelledBy={systemId}
             value={filters.system}
-            onChange={(e) => set({ system: e.target.value })}
-          >
-            <option value="any">Any system</option>
-            {systems.map((s) => (
-              <option key={s.system} value={s.system}>
-                {s.system}
-                {s.kind === 'reference' ? ' (reference)' : ''}
-              </option>
-            ))}
-          </select>
+            onChange={(system) => set({ system })}
+            options={[
+              { value: 'any', label: 'Any system' },
+              ...systems.map((s) => ({
+                value: s.system,
+                label: s.system,
+                hint: s.kind === 'reference' ? '(reference)' : undefined,
+              })),
+            ]}
+          />
         </div>
       </form>
 
@@ -155,7 +160,7 @@ export function ExploreBrowser({ items, systems }: { items: ItemSummary[]; syste
       ) : (
         <ul className={css.list} style={{ marginTop: '1rem' }}>
           {shown.map((item) => (
-            <ItemRow key={item.id} item={item} systems={names} activeSystem={activeSystem} />
+            <ItemRow key={item.id} item={item} systems={names} activeSystem={activeSystem} onActive={onRowActive} />
           ))}
         </ul>
       )}

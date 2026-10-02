@@ -10,16 +10,25 @@ export function ItemRow({
   item,
   systems,
   activeSystem,
+  onActive,
 }: {
   item: Pick<ItemSummary, 'id' | 'split' | 'query'> & Partial<Pick<ItemSummary, 'results'>>
   /** Systems to draw an outcome cell for, in board order. Empty = no outcome strip (the
    *  static fallback list stays light: the cells arrive with the live browser). */
   systems: readonly string[]
   activeSystem?: string
+  /** Pointer / focus entered or left the row (the live browser points the board at it). */
+  onActive?: (id: string | null) => void
 }) {
   const results = item.results
   return (
-    <li className={css.row}>
+    <li
+      className={css.row}
+      onPointerEnter={onActive ? (e) => e.pointerType !== 'touch' && onActive(item.id) : undefined}
+      onPointerLeave={onActive ? () => onActive(null) : undefined}
+      onFocus={onActive ? () => onActive(item.id) : undefined}
+      onBlur={onActive ? () => onActive(null) : undefined}
+    >
       <div className={css.rowMain}>
         <div className={css.rowTop}>
           <Link href={itemHref(item.id)} className={css.rowId}>

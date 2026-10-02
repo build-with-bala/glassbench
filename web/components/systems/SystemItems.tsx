@@ -1,13 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { useId, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import type { Outcome, PublicItemResult, Split } from '../../lib/types'
 import { OUTCOME_KEYS, OUTCOME_STYLE, SPLIT_KEYS, SPLIT_LABEL, formatConfidence } from '../../lib/outcomes'
 import { itemHref } from '../../lib/routes'
 import { OutcomeBadge, SplitBadge } from '../platform/Badges'
+import { Select } from '../ui/Select'
 import ui from '../platform/ui.module.css'
 import css from './systems.module.css'
+import { boardStore } from '../world/store'
 
 export interface SystemItemRow extends PublicItemResult {
   id: string
@@ -29,44 +31,41 @@ export function SystemItems({ system, rows }: { system: string; rows: SystemItem
   )
   const filtered = split !== 'all' || outcome !== 'all'
 
+  // the board beside the page head keeps lit only the items this filter lists
+  useEffect(() => {
+    boardStore.setBase({ system, highlight: filtered ? { items: shown.map((r) => r.id) } : null })
+  }, [system, shown, filtered])
+
   return (
     <div>
       <div className={ui.controls}>
-        <div className={ui.field}>
-          <label className={ui.label} htmlFor={splitId}>
+        <div className={`${ui.field} ${ui.fieldSelect}`}>
+          <span className={ui.label} id={splitId}>
             Split
-          </label>
-          <select
-            id={splitId}
-            className={ui.select}
+          </span>
+          <Select<Split | 'all'>
+            labelledBy={splitId}
             value={split}
-            onChange={(e) => setSplit(e.target.value as Split | 'all')}
-          >
-            <option value="all">All splits</option>
-            {SPLIT_KEYS.map((s) => (
-              <option key={s} value={s}>
-                {SPLIT_LABEL[s]}
-              </option>
-            ))}
-          </select>
+            onChange={setSplit}
+            options={[
+              { value: 'all', label: 'All splits' },
+              ...SPLIT_KEYS.map((s) => ({ value: s, label: SPLIT_LABEL[s] })),
+            ]}
+          />
         </div>
-        <div className={ui.field}>
-          <label className={ui.label} htmlFor={outcomeId}>
+        <div className={`${ui.field} ${ui.fieldSelect}`}>
+          <span className={ui.label} id={outcomeId}>
             Outcome
-          </label>
-          <select
-            id={outcomeId}
-            className={ui.select}
+          </span>
+          <Select<Outcome | 'all'>
+            labelledBy={outcomeId}
             value={outcome}
-            onChange={(e) => setOutcome(e.target.value as Outcome | 'all')}
-          >
-            <option value="all">All outcomes</option>
-            {OUTCOME_KEYS.map((o) => (
-              <option key={o} value={o}>
-                {OUTCOME_STYLE[o].label}
-              </option>
-            ))}
-          </select>
+            onChange={setOutcome}
+            options={[
+              { value: 'all', label: 'All outcomes' },
+              ...OUTCOME_KEYS.map((o) => ({ value: o, label: OUTCOME_STYLE[o].label })),
+            ]}
+          />
         </div>
         <p className={ui.status} role="status" aria-live="polite">
           {shown.length} of {rows.length} items
@@ -94,7 +93,16 @@ export function SystemItems({ system, rows }: { system: string; rows: SystemItem
       ) : (
         <ul className={css.items}>
           {shown.map((r) => (
-            <li key={r.id} className={css.item}>
+            <li
+              key={r.id}
+              className={css.item}
+              onPointerEnter={(e) => {
+                if (e.pointerType !== 'touch') boardStore.setPreview({ focus: r.id })
+              }}
+              onPointerLeave={() => boardStore.setPreview(null)}
+              onFocus={() => boardStore.setPreview({ focus: r.id })}
+              onBlur={() => boardStore.setPreview(null)}
+            >
               <div className={css.itemMain}>
                 <Link href={itemHref(r.id)} className={css.itemId}>
                   {r.id}

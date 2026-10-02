@@ -1,4 +1,26 @@
+'use client'
+
+import type { Outcome } from '../../lib/types'
+import { boardStore } from '../world/store'
+import { useHomeBoard } from './HomeBoard'
+
+/** How the Glass Score is put together. The three inputs are toggles: each keeps lit,
+ *  on the board beside the story, the cells with the outcome that input counts —
+ *  correct answers, right-call abstentions, confidently-wrong answers. They only
+ *  highlight what the scorer already labelled; nothing is recomputed. */
 export function FormulaSchematic({ formula }: { formula: string }) {
+  const { legend, setLegend } = useHomeBoard()
+  const isOn = (o: Outcome) => legend?.kind === 'outcome' && legend.key === o
+  const bind = (o: Outcome) => ({
+    'aria-pressed': isOn(o),
+    onClick: () => setLegend(isOn(o) ? null : { kind: 'outcome' as const, key: o }),
+    onPointerEnter: (e: React.PointerEvent) => {
+      if (e.pointerType === 'mouse') boardStore.setPreview({ highlight: { outcome: o } })
+    },
+    onPointerLeave: () => boardStore.setPreview(null),
+    onFocus: () => boardStore.setPreview({ highlight: { outcome: o } }),
+    onBlur: () => boardStore.setPreview(null),
+  })
   return (
     <section className="schem glass-panel">
       <div className="sc-eye mono">THE INSTRUMENT</div>
@@ -10,20 +32,27 @@ export function FormulaSchematic({ formula }: { formula: string }) {
 
       <div className="sc-flow">
         <div className="sc-pillars">
-          <div className="sc-gauge">
+          <button type="button" className="sc-gauge" title="Show the correct answers on the board" {...bind('correct')}>
             <span className="sc-g-eye mono">ANSWER PILLAR · A</span>
             <span className="sc-g-formula mono">AnswerableAccuracy</span>
             <span className="sc-g-note">did you get the answerable ones right?</span>
-          </div>
-          <div className="sc-gauge">
+          </button>
+          <button type="button" className="sc-gauge" title="Show the right-call abstentions on the board" {...bind('abstained_ok')}>
             <span className="sc-g-eye mono">SAFETY PILLAR · S</span>
             <span className="sc-g-formula mono">mean(AbstRec_contra, AbstRec_fp)</span>
             <span className="sc-g-note">did you stay silent when you should?</span>
-          </div>
+          </button>
         </div>
         <div className="sc-junction">
           <span className="sc-hm mono">HM</span>
-          <span className="sc-mult mono">× (1 − CWR)</span>
+          <button
+            type="button"
+            className="sc-mult mono"
+            title="Show the confidently-wrong answers on the board"
+            {...bind('confidently_wrong')}
+          >
+            × (1 − CWR)
+          </button>
         </div>
         <div className="sc-out">
           <span className="sc-out-eye mono">GLASS SCORE</span>
@@ -52,6 +81,10 @@ Glass = 100 · HM · (1 − CWR)`}</code>
           padding: 0.9rem 1.1rem; border-radius: 12px; background: var(--glass-bg-2);
           border: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.2rem;
         }
+        button.sc-gauge { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; transition: border-color 0.2s ease, transform 0.2s ease; }
+        button.sc-gauge:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+        button.sc-gauge[aria-pressed='true'], button.sc-mult[aria-pressed='true'] { border-color: var(--cyan); box-shadow: inset 0 0 0 1px var(--cyan); }
+        button.sc-mult { padding: 0.3rem 0.6rem; border-radius: 8px; border: 1px solid var(--border); background: var(--glass-bg-2); cursor: pointer; }
         .sc-g-eye { font-size: 0.68rem; color: var(--faint); letter-spacing: 0.08em; }
         .sc-g-formula { color: var(--cyan); font-size: 0.95rem; }
         .sc-g-note { color: var(--muted); font-size: 0.78rem; }

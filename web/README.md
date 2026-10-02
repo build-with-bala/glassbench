@@ -2,8 +2,9 @@
 
 The Next.js site for GlassBench, live at <https://glassbench.buildwithbala.in>: the
 story, the leaderboard, a page per system, an item explorer, a compare view, a submission
-page with an in-browser `predictions.json` checker, and static JSON endpoints — over a
-real-time WebGL board of frosted-glass slabs, co-equal light/dark.
+page with an in-browser `predictions.json` checker, and static JSON endpoints — around a
+real-time WebGL board of glass cells, one per benchmark item, that shows each system's
+actual per-item results. Co-equal light/dark.
 
 It is presentation only. **The Python scorer is the single source of truth and the site
 never computes a score.**
@@ -77,35 +78,87 @@ same `(code, row)` errors and warnings for every file. If you change a validator
 change the port and run `make fixtures` at the repo root.
 
 ## Styling
-`app/globals.css` owns the theme: surfaces, the accent (`--cyan`), `--good` / `--warn` /
-`--danger` and their `--tint-*`. The platform routes are styled with CSS Modules next to
-their components (`components/platform/ui.module.css` holds the shared primitives) and
-use only those custom properties — no colour is hard-coded, so a re-skin of `globals.css`
-carries over. Outcomes are never signalled by colour alone: every badge has its own glyph
-and label.
+`app/globals.css` owns the theme: smoked-glass surfaces on a cool near-black, one brand
+accent — a very light, icy blue (`--accent`; `--cyan` is its historical alias) — and
+`--good` / `--warn` / `--danger` with their `--tint-*`. On the light theme the accent
+steps down to a darker blue of the same hue so text, links, focus rings and filled buttons
+stay readable. `--danger` is the ember of a confidently-wrong cell. The platform routes
+are styled with CSS Modules next to their components (`components/platform/ui.module.css`
+holds the shared primitives) and use only those custom properties — no colour is
+hard-coded, so a re-skin of `globals.css` carries over. Outcomes are never signalled by
+colour alone: every badge has its own glyph and label.
 
-## World
-`components/world/` draws one slab per benchmark item (counts come from
-`split_counts`, passed down from the layout): answerable slabs can be lit from inside,
-stale slabs carry a floating upper layer, contradiction slabs sit sunk, false-premise
-slabs stay dark. `board.ts` is the pure layout, `slabGeometry.ts` the squircle mesh,
-`slabMaterial.ts` the frosted-glass shader, `useSceneRoute.ts` the per-route variation
-(unknown routes get the calm scene). Three tiers: full (bloom, hover, parallax),
-reduced (coarse pointers, no post-processing), and a still poster for reduced motion
-or save-data.
+## The board
+`components/world/` draws a plate of glass cells, one per item, laid out like a lab plate
+(96 items make 12 × 8) with the splits side by side. For the system being shown:
+
+| On the board | Means (read from `item_results.json`) |
+|---|---|
+| height of a cell | the confidence the system stated for that item |
+| clear glass, blue light inside | answered, correct |
+| clear glass, a dull warm coal | answered, wrong, below the confident threshold |
+| clear glass, burning | **confidently wrong** — the cells CWR counts |
+| frosted glass, dark | abstained on an unanswerable item |
+| frosted glass, a trace of blue behind the frost | abstained on an item that was answerable |
+
+Nothing is computed: `lib/world-data.ts` reshapes the pipeline's outcomes and confidences
+(no gold, no answer text) and the layout hands them to every page once.
+
+- `plate.ts` — pure layout and the outcome → look vocabulary. `resolve.ts` — what a
+  request means for this data (which system, which cells stay lit). Both unit-tested.
+- `store.ts` — a small external store. Pages write what they want shown (`base`), a home
+  story section may fill in a default (`story`), hover and focus add a `preview`; the scene
+  reads it in its frame loop without re-rendering.
+- `GlassScene.tsx`, `materials.ts`, `cellGeometry.ts` — the scene. Shells are real
+  alpha-blended glass (far wall, then near wall, cells sorted far to near) over opaque
+  light columns; frosted glass hides what is inside. Per-cell state lives in two tiny float
+  textures the CPU eases, so the plate's shader can paint each cell's socket, shadow and
+  pool of light. Bloom is built from three's own passes.
+- `useSceneRoute.ts` — where the board sits per route: the hero's instrument on `/`, a
+  smaller instrument beside the page head on the results pages, small in the margin on
+  text-first pages.
+- Tiers: `full` (desktop), `reduced` (coarse pointers: lighter geometry, no bloom, same
+  interactions by touch and keyboard), `poster` (reduced motion / save-data: a still).
+
+### What you can touch
+- **Home** — pick a system (radio group) and all cells re-animate to its results; hover or
+  focus a cell for its id, split, outcome and confidence; click (or Enter) to open
+  `/explore/<id>`; legend chips keep one outcome or one split lit; drag, the view buttons
+  or `[` `]` turn the board (bounded). Scrolling into the story moves the board beside it;
+  the CWR section leaves only the confidently-wrong cells burning, and its marks, the
+  split cards and the formula inputs are buttons for the same board.
+- **Leaderboard / systems** — the row or card under the pointer (or holding focus) is the
+  system shown; an open row keeps it.
+- **Compare** — system A's results with only the disagreements lit; pointing at a listed
+  item singles its cell out, pointing at B's side shows B.
+- **Explore / item / system pages** — the filter's items stay lit; the current or hovered
+  item's cell is singled out.
+- **Everywhere** — `⌘K` / `Ctrl+K` / `/` opens the command palette (pages, systems, all
+  items); `g` then a letter goes straight to a page; `t` switches theme; glass panels
+  catch the light under the pointer; the selects are a custom listbox
+  (`components/ui/Select.tsx`).
+
+The canvas wrapper is `pointer-events:none` and never takes an event. Cells are reachable
+because `components/board/BoardOverlay.tsx` lays one real `<a href="/explore/…">` over each
+of them (the scene publishes their screen rectangles), below every in-flow panel. That is
+also the keyboard path (one tab stop, arrow keys) and what the tests click.
+
+For tests and debugging the world's root element carries `data-system`, `data-lit` and
+`data-focus`, written from the same resolver the scene draws from.
 
 The posters, the social card and the touch icon are screenshots of that scene. After
-changing the world or its palette, regenerate them with the site running:
+changing the board or its palette, regenerate them with the site running:
 ```bash
 node scripts/capture-world.mjs   # public/poster-*.jpg, app/opengraph-image.jpg, app/apple-icon.png
 ```
-The palette in `slabMaterial.ts` must track the tokens in `app/globals.css` (`--bg`
-in particular, or the canvas shows a seam).
+The palette in `materials.ts` must track the tokens in `app/globals.css` (`--bg` in
+particular, or the canvas shows a seam).
 
 ## Test
 ```bash
 npm test                 # Vitest: data contracts, validator parity, formatting, markdown, API payloads
 npx playwright test      # every route × light/dark × desktop (1440) / mobile (390), plus behaviour
+                         # (board.spec.ts drives the board with real mouse, touch and keyboard input)
 ```
 Playwright starts `npm run dev` on port 3200, or reuses a server that is already there.
 To use another port: `PLAYWRIGHT_PORT=3210 npx playwright test` (start nothing yourself,

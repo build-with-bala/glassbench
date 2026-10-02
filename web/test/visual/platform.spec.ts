@@ -25,6 +25,26 @@ async function activate(target: Locator, key: 'Enter' | 'Space' = 'Enter') {
   await target.press(key)
 }
 
+/** Choose an option of one of the site's custom selects (a select-only combobox) from
+ *  the keyboard: open it, arrow to the option, press Enter. */
+async function choose(select: Locator, value: string) {
+  await select.focus()
+  await expect(select).toBeFocused()
+  await select.press('Enter')
+  await expect(select).toHaveAttribute('aria-expanded', 'true')
+  const steps = await select.evaluate((el, want) => {
+    const list = document.getElementById(el.getAttribute('aria-controls')!)!
+    const options = [...list.querySelectorAll('[role="option"]')]
+    const active = options.findIndex((o) => o.id === el.getAttribute('aria-activedescendant'))
+    const target = options.findIndex((o) => o.textContent!.trim().replace(/^✓/, '').trim().split(' ')[0] === want)
+    return target < 0 ? null : target - active
+  }, value)
+  expect(steps, `option starting with "${value}"`).not.toBeNull()
+  for (let i = 0; i < Math.abs(steps!); i++) await select.press(steps! > 0 ? 'ArrowDown' : 'ArrowUp')
+  await select.press('Enter')
+  await expect(select).toHaveAttribute('aria-expanded', 'false')
+}
+
 /* ------------------------------------------------------------------ systems */
 
 test.describe('system pages', () => {
@@ -52,10 +72,10 @@ test.describe('system pages', () => {
     // Per-item outcomes: 96 rows, filterable.
     const items = page.locator('section', { has: page.getByRole('heading', { name: 'Per-item outcomes' }) })
     await expect(items.getByRole('status')).toHaveText('96 of 96 items')
-    await items.getByLabel('Outcome', { exact: true }).selectOption('confidently_wrong')
+    await choose(items.getByLabel('Outcome', { exact: true }), 'Confidently')
     await expect(items.getByRole('status')).toHaveText('6 of 96 items')
     await expect(items.getByRole('listitem')).toHaveCount(6)
-    await items.getByLabel('Split', { exact: true }).selectOption('contradiction')
+    await choose(items.getByLabel('Split', { exact: true }), 'contradiction')
     await expect(items.getByRole('status')).toHaveText('0 of 96 items')
     await expect(items.getByText(/no items with this combination/i)).toBeVisible()
     await activate(items.getByRole('button', { name: 'Clear filters' }))
@@ -99,12 +119,12 @@ test.describe('item explorer', () => {
     const status = page.getByRole('status').filter({ hasText: /^Showing/ })
     await expect(status).toHaveText('Showing 96 of 96 items')
 
-    await browser.getByLabel('Split', { exact: true }).selectOption('contradiction')
+    await choose(browser.getByLabel('Split', { exact: true }), 'contradiction')
     await expect(status).toHaveText('Showing 12 of 96 items')
     await expect(page).toHaveURL(/split=contradiction/)
 
-    await browser.getByLabel('Outcome', { exact: true }).selectOption('confidently_wrong')
-    await browser.getByLabel('For system', { exact: true }).selectOption('always_answer')
+    await choose(browser.getByLabel('Outcome', { exact: true }), 'Confidently')
+    await choose(browser.getByLabel('For system', { exact: true }), 'always_answer')
     await expect(status).toContainText('Showing 12 of 96 items')
     await expect(page).toHaveURL(/outcome=confidently_wrong/)
     await expect(page).toHaveURL(/system=always_answer/)
@@ -123,7 +143,7 @@ test.describe('item explorer', () => {
   test('a filtered view opens from its URL', async ({ page }) => {
     await page.goto('/explore?split=stale&q=sneakers')
     await expect(page.getByRole('status').filter({ hasText: /^Showing/ })).toHaveText('Showing 1 of 96 items')
-    await expect(page.getByLabel('Split', { exact: true })).toHaveValue('stale')
+    await expect(page.getByLabel('Split', { exact: true })).toHaveAttribute('data-value', 'stale')
     await expect(page.getByLabel('Search id or query text')).toHaveValue('sneakers')
     await activate(page.getByRole('link', { name: ITEM }))
     await expect(page).toHaveURL(new RegExp(`/explore/${ITEM}$`))
@@ -181,8 +201,8 @@ test.describe('item explorer', () => {
 test.describe('compare', () => {
   test('opens a pair from the URL with metrics, deltas and disagreements', async ({ page }) => {
     await page.goto('/compare?a=agent_llm&b=bm25_retrieval')
-    await expect(page.getByLabel('System A', { exact: true })).toHaveValue('agent_llm')
-    await expect(page.getByLabel('System B', { exact: true })).toHaveValue('bm25_retrieval')
+    await expect(page.getByLabel('System A', { exact: true })).toHaveAttribute('data-value', 'agent_llm')
+    await expect(page.getByLabel('System B', { exact: true })).toHaveAttribute('data-value', 'bm25_retrieval')
 
     const table = page.getByRole('table', { name: /metrics of agent_llm and bm25_retrieval/i })
     const glass = table.getByRole('row', { name: /^Glass Score/ })
@@ -201,15 +221,15 @@ test.describe('compare', () => {
 
   test('changing a system updates the URL; picking the other side’s system swaps', async ({ page }) => {
     await page.goto('/compare')
-    await expect(page.getByLabel('System A', { exact: true })).toHaveValue('agent_llm')
-    await expect(page.getByLabel('System B', { exact: true })).toHaveValue('random_confidence')
+    await expect(page.getByLabel('System A', { exact: true })).toHaveAttribute('data-value', 'agent_llm')
+    await expect(page.getByLabel('System B', { exact: true })).toHaveAttribute('data-value', 'random_confidence')
     await expect(page).toHaveURL(/a=agent_llm&b=random_confidence/)
 
-    await page.getByLabel('System B', { exact: true }).selectOption('always_abstain')
+    await choose(page.getByLabel('System B', { exact: true }), 'always_abstain')
     await expect(page).toHaveURL(/a=agent_llm&b=always_abstain/)
-    await page.getByLabel('System A', { exact: true }).selectOption('always_abstain')
-    await expect(page.getByLabel('System A', { exact: true })).toHaveValue('always_abstain')
-    await expect(page.getByLabel('System B', { exact: true })).toHaveValue('agent_llm')
+    await choose(page.getByLabel('System A', { exact: true }), 'always_abstain')
+    await expect(page.getByLabel('System A', { exact: true })).toHaveAttribute('data-value', 'always_abstain')
+    await expect(page.getByLabel('System B', { exact: true })).toHaveAttribute('data-value', 'agent_llm')
 
     await activate(page.getByRole('button', { name: /^Swap/ }))
     await expect(page).toHaveURL(/a=agent_llm&b=always_abstain/)
@@ -217,8 +237,8 @@ test.describe('compare', () => {
 
   test('falls back to a valid pair when the URL names unknown systems', async ({ page }) => {
     await page.goto('/compare?a=ghost&b=ghost')
-    await expect(page.getByLabel('System A', { exact: true })).toHaveValue('agent_llm')
-    await expect(page.getByLabel('System B', { exact: true })).toHaveValue('random_confidence')
+    await expect(page.getByLabel('System A', { exact: true })).toHaveAttribute('data-value', 'agent_llm')
+    await expect(page.getByLabel('System B', { exact: true })).toHaveAttribute('data-value', 'random_confidence')
   })
 })
 

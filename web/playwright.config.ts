@@ -8,8 +8,14 @@ const BASE_URL = `http://localhost:${PORT}`
 
 export default defineConfig({
   testDir: './test/visual',
-  timeout: 60_000,
+  timeout: 90_000,
+  // the board renders with software WebGL in CI and in headless runs; under several
+  // workers a state change can take a few seconds to reach the DOM
+  expect: { timeout: 12_000 },
   fullyParallel: false,
+  // every page carries a WebGL canvas, and headless Chromium rasterises it on the CPU:
+  // more workers than this starve each other and the dev server
+  workers: process.env.CI ? 2 : 4,
   use: { baseURL: BASE_URL, trace: 'off' },
   webServer: {
     // `npm run dev` hard-codes 3200, so for any other port run the same two steps by hand.

@@ -102,6 +102,8 @@ describe('the repo documents it renders', () => {
     const { html, toc } = getDatasheetHtml()
     expect(toc.length).toBeGreaterThan(5)
     expect(html).toContain('<em>Datasheets for Datasets</em>')
+    // the page supplies the only <h1>; the document's own title is demoted
+    expect(html).not.toContain('<h1')
     // Repo-relative links resolve to the repository instead of staying as "[text](path)".
     expect(html).toContain('/blob/main/PRE_REGISTRATION.md"')
     expect(html).not.toMatch(/\]\((?!http)[\w./-]+\)/)

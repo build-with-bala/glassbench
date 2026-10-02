@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ThemeToggle } from '../theme/ThemeToggle'
+import { openCommandPalette } from './CommandPalette'
 
 const LINKS = [
   { href: '/', label: 'Overview' },
@@ -35,6 +36,18 @@ export function Nav() {
         >
           GitHub <span aria-hidden="true">↗</span>
         </a>
+        <button
+          type="button"
+          className="nav-search"
+          onClick={openCommandPalette}
+          aria-label="Search pages, systems and items"
+          aria-keyshortcuts="Meta+K Control+K /"
+          title="Search (⌘K or /)"
+        >
+          <span className="nav-search-icon" aria-hidden="true" />
+          <span className="nav-search-text">Search</span>
+          <kbd aria-hidden="true">⌘K</kbd>
+        </button>
         <ThemeToggle />
       </div>
     </nav>

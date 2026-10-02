@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metric, ReferenceRow } from '../../lib/types'
 import { systemHref } from '../../lib/routes'
+import { BoardHover } from '../board/BoardBinding'
 
 interface Props {
   references: ReferenceRow[]
@@ -23,7 +24,7 @@ export function ReferenceScale({ references }: Props) {
       </div>
       <div className="ref-grid">
         {references.map((r) => (
-          <div key={r.system} className="ref-card glass-panel">
+          <BoardHover key={r.system} system={r.system} className="ref-card glass-panel">
             <div className="ref-card-top">
               <span className="ref-name mono">
                 <Link href={systemHref(r.system)}>{r.system}</Link>
@@ -39,7 +40,7 @@ export function ReferenceScale({ references }: Props) {
             </div>
             <p className="ref-what">{r.what_it_is}</p>
             <p className="ref-why">{r.excluded_reason}</p>
-          </div>
+          </BoardHover>
         ))}
       </div>
 

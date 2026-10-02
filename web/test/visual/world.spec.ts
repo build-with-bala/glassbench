@@ -23,27 +23,28 @@ async function open(page: Page, theme: 'dark' | 'light', motion: 'no-preference'
   return pageErrors
 }
 
-/** Screenshot of the part of the viewport the hero keeps free for the slabs. */
+/** Screenshot of the part of the viewport the hero keeps free for the board. */
 async function slabRegion(page: Page): Promise<Buffer> {
   const { width, height } = page.viewportSize()!
   const portrait = width < height
   const clip = portrait
     ? { x: 0, y: Math.round(height * 0.12), width, height: Math.round(height * 0.26) }
-    : { x: Math.round(width * 0.58), y: Math.round(height * 0.2), width: Math.round(width * 0.38), height: Math.round(height * 0.6) }
+    : { x: Math.round(width * 0.5), y: Math.round(height * 0.3), width: Math.round(width * 0.45), height: Math.round(height * 0.46) }
   return page.screenshot({ clip })
 }
 
 for (const theme of ['dark', 'light'] as const) {
-  test(`world [${theme}] draws the slab scene on a live canvas`, async ({ page }) => {
+  test(`world [${theme}] draws the glass board on a live canvas`, async ({ page }) => {
     const pageErrors = await open(page, theme, 'no-preference')
     const world = page.locator('.world-root')
-    await expect(world.locator('canvas')).toHaveCount(1)
+    // software WebGL under a parallel run can take a while to compile its shaders
+    await expect(world.locator('canvas')).toHaveCount(1, { timeout: 30_000 })
     await expect(world).toHaveAttribute('data-quality', /full|reduced/)
     await expect(world).toHaveAttribute('data-scene', 'hero')
     // the canvas must be visible, not hidden behind a reveal gate
     await expect(world.locator('canvas')).toHaveCSS('opacity', '1')
     await expect
-      .poll(async () => (await slabRegion(page)).length, { timeout: 20_000, intervals: [500] })
+      .poll(async () => (await slabRegion(page)).length, { timeout: 40_000, intervals: [500] })
       .toBeGreaterThan(DRAWN_BYTES)
     expect(pageErrors, pageErrors.join('\n')).toHaveLength(0)
   })
@@ -63,7 +64,7 @@ test('world falls back to a still when motion is reduced', async ({ page }) => {
 test('world morphs per route and never intercepts DOM clicks', async ({ page }) => {
   await open(page, 'dark', 'no-preference')
   const world = page.locator('.world-root')
-  await expect(world.locator('canvas')).toHaveCount(1)
+  await expect(world.locator('canvas')).toHaveCount(1, { timeout: 30_000 })
   await expect(world).toHaveCSS('pointer-events', 'none')
 
   // a real mouse press on a hero button that sits directly over the canvas
@@ -75,11 +76,11 @@ test('world morphs per route and never intercepts DOM clicks', async ({ page }) 
   await page.mouse.down()
   await page.mouse.up()
   await expect(page).toHaveURL(/leaderboard/)
-  await expect(world).toHaveAttribute('data-scene', 'board')
+  await expect(world).toHaveAttribute('data-scene', 'side')
   // same canvas, still mounted: the world persists across routes
   await expect(world.locator('canvas')).toHaveCount(1)
 
-  await page.locator('nav.site-nav').getByRole('link', { name: 'Datasheet', exact: true }).click()
-  await expect(page).toHaveURL(/datasheet/)
-  await expect(world).toHaveAttribute('data-scene', 'card')
+  await page.locator('nav.site-nav').getByRole('link', { name: 'Submit', exact: true }).click()
+  await expect(page).toHaveURL(/submit/)
+  await expect(world).toHaveAttribute('data-scene', 'quiet')
 })

@@ -20,6 +20,7 @@ import { OutcomeBar } from '../../../components/systems/OutcomeBar'
 import { SplitBreakdown } from '../../../components/systems/SplitBreakdown'
 import { GlassDecomposition } from '../../../components/systems/GlassDecomposition'
 import { SystemItems, type SystemItemRow } from '../../../components/systems/SystemItems'
+import { BoardBinding } from '../../../components/board/BoardBinding'
 import ui from '../../../components/platform/ui.module.css'
 import css from '../../../components/systems/systems.module.css'
 
@@ -91,6 +92,7 @@ export default async function SystemPage({ params }: { params: Params }) {
 
   return (
     <main id="main" className={ui.page}>
+      <BoardBinding system={card.system} />
       <Breadcrumbs
         trail={[{ label: 'Leaderboard', href: '/leaderboard' }, { label: 'Systems', href: '/systems' }, { label: card.system }]}
       />

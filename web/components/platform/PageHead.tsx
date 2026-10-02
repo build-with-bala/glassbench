@@ -20,7 +20,7 @@ export function PageHead({
   aside?: ReactNode
 }) {
   return (
-    <GlassPanel>
+    <GlassPanel className={ui.headPanel}>
       <header className={ui.head}>
         <p className={ui.eyebrow}>{eyebrow}</p>
         <h1 className={`${ui.title} ${mono ? ui.titleMono : ''}`}>{title}</h1>

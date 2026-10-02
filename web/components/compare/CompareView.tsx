@@ -16,10 +16,12 @@ import {
   type DisagreementMode,
 } from '../../lib/routes'
 import { CopyButton } from '../ui/CopyButton'
+import { Select } from '../ui/Select'
 import { MetricTip } from '../ui/MetricTip'
 import { OutcomeBadge, SplitBadge } from '../platform/Badges'
 import ui from '../platform/ui.module.css'
 import css from './compare.module.css'
+import { boardStore } from '../world/store'
 
 export interface CompareSystem extends SystemRef {
   /** Published board values by metric key (plus answered / abstained). */
@@ -30,9 +32,16 @@ function standing(s: CompareSystem): string {
   return s.kind === 'ranked' ? `rank ${s.rank}` : 'reference · not ranked'
 }
 
-function Side({ name, result }: { name: string; result: PublicItemResult }) {
+function Side({ name, item, result }: { name: string; item: string; result: PublicItemResult }) {
   return (
-    <div className={css.pairSide}>
+    <div
+      className={css.pairSide}
+      // pointing at one side shows that system's whole pattern, with this item singled out
+      onPointerEnter={(e) => {
+        if (e.pointerType !== 'touch') boardStore.setPreview({ system: name, focus: item })
+      }}
+      onPointerLeave={() => boardStore.setPreview({ focus: item })}
+    >
       <span className={css.pairName}>{name}</span>
       <OutcomeBadge outcome={result.outcome} />
       <span className={css.conf}>
@@ -91,6 +100,15 @@ export function CompareView({
   )
   const shown = useMemo(() => diff.filter((d) => matchesMode(d, state.show)), [diff, state.show])
 
+  // The board shows system A's outcomes and keeps lit only the items listed below —
+  // the ones where the two systems disagree (in the chosen group).
+  const aName = a?.system
+  useEffect(() => {
+    if (!aName) return
+    boardStore.setBase({ system: aName, highlight: { items: shown.map((d) => d.item.id) } })
+  }, [aName, shown])
+  useEffect(() => () => boardStore.resetBase(), [])
+
   if (!a || !b || !summary) {
     return (
       <div className={ui.empty}>
@@ -118,16 +136,15 @@ export function CompareView({
       <section aria-label="Systems to compare">
         <div className={css.pickers}>
           <div className={ui.field}>
-            <label className={ui.label} htmlFor={aId}>
+            <span className={ui.label} id={aId}>
               System A
-            </label>
-            <select id={aId} className={ui.select} value={a.system} onChange={(e) => pick('a', e.target.value)}>
-              {systems.map((s) => (
-                <option key={s.system} value={s.system}>
-                  {s.system} — {standing(s)}
-                </option>
-              ))}
-            </select>
+            </span>
+            <Select
+              labelledBy={aId}
+              value={a.system}
+              onChange={(name) => pick('a', name)}
+              options={systems.map((s) => ({ value: s.system, label: s.system, hint: `— ${standing(s)}` }))}
+            />
           </div>
           <button
             type="button"
@@ -138,16 +155,15 @@ export function CompareView({
             <span aria-hidden="true">⇄</span> Swap
           </button>
           <div className={ui.field}>
-            <label className={ui.label} htmlFor={bId}>
+            <span className={ui.label} id={bId}>
               System B
-            </label>
-            <select id={bId} className={ui.select} value={b.system} onChange={(e) => pick('b', e.target.value)}>
-              {systems.map((s) => (
-                <option key={s.system} value={s.system}>
-                  {s.system} — {standing(s)}
-                </option>
-              ))}
-            </select>
+            </span>
+            <Select
+              labelledBy={bId}
+              value={b.system}
+              onChange={(name) => pick('b', name)}
+              options={systems.map((s) => ({ value: s.system, label: s.system, hint: `— ${standing(s)}` }))}
+            />
           </div>
         </div>
         <div className={ui.buttonRow} style={{ marginTop: '0.8rem' }}>
@@ -296,7 +312,16 @@ export function CompareView({
         ) : (
           <ul className={css.diffs}>
             {shown.map((d) => (
-              <li key={d.item.id} className={css.diff}>
+              <li
+                key={d.item.id}
+                className={css.diff}
+                onPointerEnter={(e) => {
+                  if (e.pointerType !== 'touch') boardStore.setPreview({ focus: d.item.id })
+                }}
+                onPointerLeave={() => boardStore.setPreview(null)}
+                onFocus={() => boardStore.setPreview({ focus: d.item.id })}
+                onBlur={() => boardStore.setPreview(null)}
+              >
                 <div className={css.diffTop}>
                   <Link href={itemHref(d.item.id)} className={css.diffId}>
                     {d.item.id}
@@ -305,8 +330,8 @@ export function CompareView({
                 </div>
                 <p className={css.diffQuery}>{d.item.query}</p>
                 <div className={css.pair}>
-                  <Side name={a.system} result={d.a} />
-                  <Side name={b.system} result={d.b} />
+                  <Side name={a.system} item={d.item.id} result={d.a} />
+                  <Side name={b.system} item={d.item.id} result={d.b} />
                 </div>
               </li>
             ))}

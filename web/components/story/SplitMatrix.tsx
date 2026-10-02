@@ -1,4 +1,8 @@
-import type { SplitCounts } from '../../lib/types'
+'use client'
+
+import type { Split, SplitCounts } from '../../lib/types'
+import { boardStore } from '../world/store'
+import { useHomeBoard } from './HomeBoard'
 
 const CARDS = [
   { key: 'answerable', name: 'answerable', def: 'fact is determinable from history', act: 'ANSWER · high conf', gold: 'a string', group: 'answer' },
@@ -7,9 +11,15 @@ const CARDS = [
   { key: 'false_premise', name: 'false-premise', def: 'query asks about something never stated', act: 'ABSTAIN', gold: 'ABSTAIN', group: 'abstain' },
 ] as const
 
+/** The four splits. Each card's heading is a toggle: it keeps only that split's cells
+ *  lit on the board beside the story (the same filter as the hero's legend), and
+ *  pointing at a card or a group total previews it. */
 export function SplitMatrix({ counts }: { counts: SplitCounts }) {
+  const { legend, setLegend } = useHomeBoard()
   const answerTotal = counts.answerable + counts.stale
   const abstainTotal = counts.contradiction + counts.false_premise
+  const isOn = (key: Split) => legend?.kind === 'split' && legend.key === key
+  const preview = (splits: Split[] | null) => boardStore.setPreview(splits ? { highlight: { splits } } : null)
   return (
     <section className="splits glass-panel">
       <div className="sp-eye mono">THE TASK · FOUR WAYS TO BE TESTED</div>
@@ -18,11 +28,29 @@ export function SplitMatrix({ counts }: { counts: SplitCounts }) {
 
       <div className="sp-grid">
         {CARDS.map((c) => (
-          <div key={c.key} className={`sp-card ${c.group}`}>
-            <div className="sp-top">
+          <div
+            key={c.key}
+            className={`sp-card ${c.group} ${isOn(c.key) ? 'is-on' : ''}`}
+            onPointerEnter={(e) => {
+              if (e.pointerType === 'mouse') preview([c.key])
+            }}
+            onPointerLeave={() => preview(null)}
+          >
+            <button
+              type="button"
+              className="sp-top"
+              aria-pressed={isOn(c.key)}
+              title="Keep only these cells lit on the board"
+              onClick={() => setLegend(isOn(c.key) ? null : { kind: 'split', key: c.key })}
+              onFocus={() => preview([c.key])}
+              onBlur={() => preview(null)}
+            >
               <span className="sp-name mono">{c.name}</span>
-              <span className="sp-count mono">{counts[c.key]}</span>
-            </div>
+              <span className="sp-count mono">
+                {counts[c.key]}
+                <span className="sr-only"> items — show on the board</span>
+              </span>
+            </button>
             <p className="sp-def">{c.def}</p>
             <div className="sp-foot">
               <span className={`sp-chip chip-${c.group}`}>{c.act}</span>
@@ -34,8 +62,20 @@ export function SplitMatrix({ counts }: { counts: SplitCounts }) {
         ))}
       </div>
       <div className="sp-totals mono">
-        <span className="answer">ANSWERABLE GROUP — {answerTotal} items</span>
-        <span className="abstain">UNANSWERABLE GROUP — {abstainTotal} items · these should abstain</span>
+        <span
+          className="answer"
+          onPointerEnter={() => preview(['answerable', 'stale'])}
+          onPointerLeave={() => preview(null)}
+        >
+          ANSWERABLE GROUP — {answerTotal} items
+        </span>
+        <span
+          className="abstain"
+          onPointerEnter={() => preview(['contradiction', 'false_premise'])}
+          onPointerLeave={() => preview(null)}
+        >
+          UNANSWERABLE GROUP — {abstainTotal} items · these should abstain
+        </span>
       </div>
 
       <style>{`
@@ -50,7 +90,14 @@ export function SplitMatrix({ counts }: { counts: SplitCounts }) {
         }
         .sp-card.answer { border-left: 3px solid var(--cyan); }
         .sp-card.abstain { border-left: 3px solid var(--warn); }
-        .sp-top { display: flex; justify-content: space-between; align-items: baseline; }
+        .sp-top {
+          display: flex; justify-content: space-between; align-items: baseline; width: 100%;
+          margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer;
+        }
+        .sp-card { transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease; }
+        .sp-card:hover { transform: translateY(-2px); }
+        .sp-card.is-on { border-color: var(--cyan); box-shadow: inset 0 0 0 1px var(--cyan); }
+        .sp-totals span { cursor: default; }
         .sp-name { color: var(--ink); font-weight: 600; }
         .sp-count { color: var(--cyan); font-size: 1.4rem; font-weight: 700; }
         .sp-def { color: var(--muted); font-size: 0.84rem; line-height: 1.45; margin: 0.5rem 0 0.9rem; min-height: 3.2em; }

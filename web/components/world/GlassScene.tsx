@@ -10,130 +10,172 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js'
-import { createBoard, SLAB_HEIGHT, type BoardCounts } from './board'
-import { createSlabGeometry } from './slabGeometry'
-import { PALETTE, createGroundMaterial, createSlabMaterial, createWorldUniforms } from './slabMaterial'
-import { createRig, useSceneRoute } from './useSceneRoute'
+import { OUTCOME_KEYS } from '../../lib/outcomes'
+import type { BoardData } from '../../lib/board-data'
+import {
+  CELL_RADIUS,
+  CELL_SHOULDER,
+  NEUTRAL_LOOK,
+  PLATE_THICKNESS,
+  cellHeight,
+  createPlate,
+  lookFor,
+  type CellLook,
+} from './plate'
+import { createCoreGeometry, createPlateGeometry, createShellGeometry } from './cellGeometry'
+import {
+  PALETTE,
+  PALETTE_KEYS,
+  createCoreMaterial,
+  createFloorMaterial,
+  createPlateMaterial,
+  createShellMaterial,
+  createWorldUniforms,
+  paletteUniform,
+  type PaletteKey,
+  type WorldUniforms,
+} from './materials'
+import { resolveBoard } from './resolve'
+import { RECT_STRIDE, boardBridge, boardStore, boardTurn, effectiveRequest } from './store'
+import { STORY_POSE, createRig, sceneForPath, useSceneRoute, type Pose } from './useSceneRoute'
 
 export type WorldQuality = 'full' | 'reduced'
 
-interface Props {
-  counts: BoardCounts
-  quality: WorldQuality
-}
-
-/* Isometric-style rig: orthographic, turned a little past 45° so the grid is not
-   perfectly symmetric, looking down at roughly the true-isometric elevation. */
-const AZIMUTH = THREE.MathUtils.degToRad(49)
-const ELEVATION = THREE.MathUtils.degToRad(35.5)
-const CAMERA_DISTANCE = 30
-
-const PALETTE_KEYS = ['bg', 'gap', 'top', 'side', 'rim', 'glowHot', 'glowDeep', 'glowOlive', 'glowTint'] as const
-const UNIFORM_FOR: Record<(typeof PALETTE_KEYS)[number], string> = {
-  bg: 'uBg',
-  gap: 'uGap',
-  top: 'uTop',
-  side: 'uSide',
-  rim: 'uRim',
-  glowHot: 'uGlowHot',
-  glowDeep: 'uGlowDeep',
-  glowOlive: 'uGlowOlive',
-  glowTint: 'uGlowTint',
-}
+const FOV = 24
+const TAN_HALF_FOV = Math.tan(THREE.MathUtils.degToRad(FOV) / 2)
+/** state layout per cell: [height, frost, cool, heat,  emphasis, lift, focus, appear] */
+const STRIDE = 8
+const RATES = [6.5, 6, 5, 5, 9, 12, 14, 0]
 
 const damp = (current: number, target: number, rate: number, dt: number) =>
   current + (target - current) * (1 - Math.exp(-rate * dt))
 
-/** The board of frosted-glass slabs. One instanced draw call for every slab and
- *  layer, one for the floor, and (desktop only) a bloom pass. */
-export function GlassScene({ counts, quality }: Props) {
-  const { answerable, stale, contradiction, false_premise } = counts
-  const board = useMemo(
-    () => createBoard({ answerable, stale, contradiction, false_premise }),
-    [answerable, stale, contradiction, false_premise],
-  )
+function mixPose(out: Pose, a: Pose, b: Pose, t: number): Pose {
+  out.az = a.az + (b.az - a.az) * t
+  out.el = a.el + (b.el - a.el) * t
+  out.fit = a.fit + (b.fit - a.fit) * t
+  out.fitH = a.fitH + (b.fitH - a.fitH) * t
+  out.ax = a.ax + (b.ax - a.ax) * t
+  out.ay = a.ay + (b.ay - a.ay) * t
+  out.dim = a.dim + (b.dim - a.dim) * t
+  out.glow = a.glow + (b.glow - a.glow) * t
+  return out
+}
+const blankPose = (): Pose => ({ az: 0, el: 0, fit: 1, fitH: 1, ax: 0.5, ay: 0.5, dim: 1, glow: 1 })
+
+/** The glass board: a plate of cells, one per benchmark item, showing one system's
+ *  scorer-assigned outcome and stated confidence on each. Four draw calls for the
+ *  cells (cores, far glass wall, near glass wall), one each for plate and floor. */
+export function GlassScene({ data, quality }: { data: BoardData; quality: WorldQuality }) {
+  const plate = useMemo(() => createPlate(data.items.map((it) => it.split)), [data])
+  const count = plate.cells.length
   const pathname = usePathname()
   const { resolvedTheme } = useTheme()
-  const camera = useThree((s) => s.camera)
+  const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera
   const scene = useThree((s) => s.scene)
 
   const uniforms = useMemo(() => createWorldUniforms(), [])
-  // created once in the scene of the first pathname; later route changes tween it
   const firstPath = useRef(pathname)
-  const rig = useMemo(() => createRig(board, firstPath.current), [board])
-  useSceneRoute(rig, board)
+  const rig = useMemo(() => createRig(firstPath.current), [])
+  useSceneRoute(rig)
+  const sceneName = sceneForPath(pathname)
 
-  const slabGeometry = useMemo(() => {
-    const src = createSlabGeometry(
-      quality === 'full' ? { segments: 72, bevelSegments: 5 } : { segments: 44, bevelSegments: 3 },
-    )
-    const geo = new THREE.InstancedBufferGeometry()
-    geo.setIndex(src.getIndex())
-    geo.setAttribute('position', src.getAttribute('position'))
-    geo.setAttribute('normal', src.getAttribute('normal'))
+  /* ---- per-cell state: eased on the CPU, read by every shader ------------- */
+  const cells = useMemo(() => {
+    const texels = Math.max(1, plate.cols * plate.rows)
+    const a = new Float32Array(texels * 4)
+    const b = new Float32Array(texels * 4)
+    const make = (arr: Float32Array<ArrayBuffer>) => {
+      const t = new THREE.DataTexture(arr, Math.max(1, plate.cols), Math.max(1, plate.rows), THREE.RGBAFormat, THREE.FloatType)
+      t.minFilter = THREE.NearestFilter
+      t.magFilter = THREE.NearestFilter
+      t.needsUpdate = true
+      return t
+    }
+    return {
+      a,
+      b,
+      texA: make(a),
+      texB: make(b),
+      cur: new Float32Array(count * STRIDE),
+      tgt: new Float32Array(count * STRIDE),
+      next: new Float32Array(count * STRIDE),
+      startAt: new Float32Array(count),
+      /** entrance order: the wave runs along the plate */
+      delay: Float32Array.from(plate.cells, (c) => (c.col / Math.max(1, plate.cols - 1)) * 0.8 + (c.row / Math.max(1, plate.rows - 1)) * 0.2),
+    }
+  }, [plate, count])
 
-    const count = board.tiles.length + board.stacks.length
-    const offset = new Float32Array(count * 3)
-    const lit = new Float32Array(count * 4)
-    const lift = new Float32Array(count * 4)
-    const show = new Float32Array(count * 4)
-    const misc = new Float32Array(count * 4)
+  useEffect(() => {
+    uniforms.uStateA.value = cells.texA
+    uniforms.uStateB.value = cells.texB
+    uniforms.uGrid.value.set(plate.cols, plate.rows)
+    uniforms.uCount.value = count
+    uniforms.uPlateHalf.value.set(plate.width / 2, plate.depth / 2)
+    return () => {
+      cells.texA.dispose()
+      cells.texB.dispose()
+    }
+  }, [cells, uniforms, plate, count])
 
-    board.tiles.forEach((t, i) => {
-      offset.set([t.x, t.y, t.z], i * 3)
-      lit.set(t.lit, i * 4)
-      lift.set(t.lift, i * 4)
-      show.set([1, 1, 1, 1], i * 4)
-      misc.set([t.seed, 0, t.split === 'false_premise' ? 1 : 0, t.delay], i * 4)
-    })
-    board.stacks.forEach((s, n) => {
-      const i = board.tiles.length + n
-      const t = board.tiles[s.tile]
-      offset.set([t.x, t.y, t.z], i * 3)
-      lit.set(s.under, i * 4)
-      // top of the layer = slab lift + clear gap + its own thickness
-      lift.set(
-        s.gap.map((g, k) => t.lift[k] + g + SLAB_HEIGHT),
-        i * 4,
-      )
-      show.set(s.show, i * 4)
-      misc.set([(t.seed * 7.13) % 1, 1, 0, Math.min(1, t.delay + 0.08)], i * 4)
-    })
+  /* ---- geometry ----------------------------------------------------------- */
+  const geo = useMemo(() => {
+    const full = quality === 'full'
+    const shellSrc = createShellGeometry(full ? 30 : 20)
+    const coreSrc = createCoreGeometry(full ? 18 : 12)
+    const cell = new THREE.InstancedBufferAttribute(new Float32Array(count * 2), 2)
+    const base = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3)
+    const instanced = (src: THREE.BufferGeometry) => {
+      const g = new THREE.InstancedBufferGeometry()
+      g.setIndex(src.getIndex())
+      g.setAttribute('position', src.getAttribute('position'))
+      g.setAttribute('normal', src.getAttribute('normal'))
+      g.setAttribute('aBody', src.getAttribute('aBody'))
+      g.setAttribute('aCell', cell)
+      g.setAttribute('aBase', base)
+      g.instanceCount = count
+      return g
+    }
+    return {
+      shell: instanced(shellSrc),
+      core: instanced(coreSrc),
+      plate: createPlateGeometry(plate.width, plate.depth),
+      cell,
+      base,
+      order: plate.cells.map((_, i) => i),
+      sortedFor: Number.NaN,
+    }
+  }, [plate, count, quality])
 
-    geo.setAttribute('aOffset', new THREE.InstancedBufferAttribute(offset, 3))
-    geo.setAttribute('aLit', new THREE.InstancedBufferAttribute(lit, 4))
-    geo.setAttribute('aLift', new THREE.InstancedBufferAttribute(lift, 4))
-    geo.setAttribute('aShow', new THREE.InstancedBufferAttribute(show, 4))
-    geo.setAttribute('aMisc', new THREE.InstancedBufferAttribute(misc, 4))
-    geo.instanceCount = count
-    return geo
-  }, [board, quality])
-
-  const slabMaterial = useMemo(() => createSlabMaterial(uniforms), [uniforms])
-  const groundMaterial = useMemo(() => createGroundMaterial(uniforms), [uniforms])
-  const groundSize = (board.side + 6) * 1
+  const mats = useMemo(
+    () => ({
+      core: createCoreMaterial(uniforms),
+      shellBack: createShellMaterial(uniforms, true),
+      shellFront: createShellMaterial(uniforms, false),
+      plate: createPlateMaterial(uniforms),
+      floor: createFloorMaterial(uniforms),
+    }),
+    [uniforms],
+  )
 
   useEffect(
     () => () => {
-      slabGeometry.dispose()
+      geo.shell.dispose()
+      geo.core.dispose()
+      geo.plate.dispose()
     },
-    [slabGeometry],
+    [geo],
   )
   useEffect(
     () => () => {
-      slabMaterial.dispose()
-      groundMaterial.dispose()
+      Object.values(mats).forEach((m) => m.dispose())
     },
-    [slabMaterial, groundMaterial],
+    [mats],
   )
 
-  // palette endpoints, converted once
   const palette = useMemo(() => {
-    const make = (p: Record<(typeof PALETTE_KEYS)[number], string>) =>
-      Object.fromEntries(PALETTE_KEYS.map((k) => [k, new THREE.Color(p[k])])) as Record<
-        (typeof PALETTE_KEYS)[number],
-        THREE.Color
-      >
+    const make = (p: Record<PaletteKey, string>) =>
+      Object.fromEntries(PALETTE_KEYS.map((k) => [k, new THREE.Color(p[k])])) as Record<PaletteKey, THREE.Color>
     return { dark: make(PALETTE.dark), light: make(PALETTE.light) }
   }, [])
 
@@ -141,207 +183,311 @@ export function GlassScene({ counts, quality }: Props) {
   const live = useRef({
     theme: -1,
     themeTarget: resolvedTheme === 'light' ? 1 : 0,
-    px: 0,
-    py: 0,
-    parX: 0,
-    parY: 0,
-    pointerActive: 0,
-    hover: 0,
     scroll: 0,
     scrollTarget: 0,
     elapsed: 0,
+    version: -1,
+    system: '' as string | null,
+    turnAz: 0,
+    turnEl: 0,
+    hero: sceneName === 'hero',
+    lastView: '',
+    lastCam: '',
+    settled: false,
+    freeFrame: typeof window !== 'undefined' && (window as unknown as { __boardFrame?: string }).__boardFrame === 'free',
   })
   live.current.themeTarget = resolvedTheme === 'light' ? 1 : 0
+  live.current.hero = sceneName === 'hero'
 
   const tmp = useMemo(
     () => ({
       dir: new THREE.Vector3(),
       right: new THREE.Vector3(),
-      up: new THREE.Vector3(),
       target: new THREE.Vector3(),
-      origin: new THREE.Vector3(),
       key: new THREE.Vector3(),
+      p: new THREE.Vector3(),
+      q: new THREE.Vector3(),
+      pose: blankPose(),
+      story: blankPose(),
+      spill: new THREE.Color(),
     }),
     [],
   )
 
   useEffect(() => {
-    scene.background = uniforms.uBg.value
-    uniforms.uBoardHalf.value = board.side / 2
+    scene.background = paletteUniform(uniforms, 'bg')
+    boardBridge.rects = new Float32Array(data.items.length * RECT_STRIDE)
     return () => {
       scene.background = null
+      boardBridge.rects = null
+      boardBridge.frame++
     }
-  }, [scene, uniforms, board])
+  }, [scene, uniforms, data])
 
-  // entrance: slabs rise in a ripple, then the cluster lights up
+  // entrance: the cells grow out of the plate in a wave, then the light comes up
   useEffect(() => {
     rig.intro = 0
     rig.glowIntro = 0
     const tl = gsap.timeline()
-    tl.to(rig, { intro: 1, duration: 2.1, ease: 'power2.out' }, 0.05)
-    tl.to(rig, { glowIntro: 1, duration: 1.7, ease: 'power2.inOut' }, 0.4)
+    tl.to(rig, { intro: 1, duration: 1.9, ease: 'power2.out' }, 0.05)
+    tl.to(rig, { glowIntro: 1, duration: 1.5, ease: 'power2.inOut' }, 0.45)
     return () => {
       tl.kill()
     }
   }, [rig])
 
-  // pointer + scroll are read from window: the canvas wrapper stays
-  // pointer-events:none, so the world can never swallow a DOM click.
+  // scroll is read from window; the canvas wrapper stays pointer-events:none
   useEffect(() => {
     const s = live.current
     const onScroll = () => {
-      s.scrollTarget = Math.min(1, Math.max(0, window.scrollY / Math.max(1, window.innerHeight * 0.85)))
+      s.scrollTarget = Math.min(1, Math.max(0, window.scrollY / Math.max(1, window.innerHeight)))
     }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
-    if (quality !== 'full') {
-      return () => window.removeEventListener('scroll', onScroll)
-    }
-    const onMove = (e: PointerEvent) => {
-      if (e.pointerType === 'touch') return
-      s.px = (e.clientX / Math.max(1, window.innerWidth)) * 2 - 1
-      s.py = -((e.clientY / Math.max(1, window.innerHeight)) * 2 - 1)
-      s.pointerActive = 1
-    }
-    const onLeave = () => {
-      s.pointerActive = 0
-    }
-    window.addEventListener('pointermove', onMove, { passive: true })
-    document.documentElement.addEventListener('pointerleave', onLeave)
-    window.addEventListener('blur', onLeave)
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('pointermove', onMove)
-      document.documentElement.removeEventListener('pointerleave', onLeave)
-      window.removeEventListener('blur', onLeave)
-    }
-  }, [quality])
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   useFrame((state, rawDt) => {
     const dt = Math.min(rawDt, 0.1)
     const s = live.current
     const u = uniforms
     s.elapsed += dt
+    const time = (u.uTime.value += dt)
 
-    // safety net: if the entrance tween never ran, do not leave the world hidden
+    // safety net: if the entrance tween never ran, do not leave the board hidden
     if (s.elapsed > 5 && (rig.intro < 0.999 || rig.glowIntro < 0.999)) {
       rig.intro = 1
       rig.glowIntro = 1
     }
 
-    // ---- theme ----
+    /* ---- theme ---- */
     const prevTheme = s.theme
     s.theme = s.theme < 0 ? s.themeTarget : damp(s.theme, s.themeTarget, 3.2, dt)
     if (Math.abs(s.theme - s.themeTarget) < 0.002) s.theme = s.themeTarget
     if (s.theme !== prevTheme) {
-      for (const k of PALETTE_KEYS) {
-        const uniform = u[UNIFORM_FOR[k]]
-        if (uniform) (uniform.value as THREE.Color).lerpColors(palette.dark[k], palette.light[k], s.theme)
-      }
+      for (const k of PALETTE_KEYS) paletteUniform(u, k).lerpColors(palette.dark[k], palette.light[k], s.theme)
       u.uTheme.value = s.theme
     }
 
-    // ---- inputs ----
-    s.parX = damp(s.parX, s.px * s.pointerActive, 2.2, dt)
-    s.parY = damp(s.parY, s.py * s.pointerActive, 2.2, dt)
-    s.hover = damp(s.hover, s.pointerActive, 3, dt)
+    /* ---- what the DOM asked for -> per-cell targets ---- */
+    const store = boardStore.get()
+    let dirty = false
+    if (store.version !== s.version) {
+      s.version = store.version
+      const resolved = resolveBoard(data, effectiveRequest(store))
+      const res = resolved.system ? data.results[resolved.system] : undefined
+      const h = resolved.filtered
+      const systemChanged = resolved.system !== s.system
+      s.system = resolved.system
+      for (let ci = 0; ci < count; ci++) {
+        const cell = plate.cells[ci]
+        let look: CellLook = res ? lookFor(OUTCOME_KEYS[res.outcome[cell.item]], res.confidence[cell.item]) : NEUTRAL_LOOK
+        const match = resolved.lit[cell.item]
+        const focus = resolved.focus === cell.item
+        // on neutral glass a highlighted cell has no outcome to show, so it simply lights
+        if (!res && ((h && match) || focus)) look = { height: 0.62, frost: 0, cool: 1, heat: 0 }
+        const o = ci * STRIDE
+        const nx = cells.next
+        nx[o] = look.height
+        nx[o + 1] = look.frost
+        nx[o + 2] = look.cool
+        nx[o + 3] = look.heat
+        nx[o + 4] = focus || match ? 1 : 0
+        nx[o + 5] = focus ? 0.2 : h && match ? 0.045 : 0
+        nx[o + 6] = focus ? 1 : 0
+        // a change of system sweeps across the plate; a highlight answers at once
+        cells.startAt[ci] = systemChanged ? time + cell.col * 0.02 + cell.row * 0.012 : 0
+      }
+      s.settled = false
+    }
+
+    /* ---- ease the state and upload it ---- */
+    const intro = rig.intro
+    if (!s.settled || intro < 1) {
+      let moving = 0
+      const { cur, tgt, next, startAt, delay, a, b } = cells
+      for (let ci = 0; ci < count; ci++) {
+        const o = ci * STRIDE
+        if (time >= startAt[ci]) {
+          for (let k = 0; k < 7; k++) tgt[o + k] = next[o + k]
+        } else {
+          moving = 1
+        }
+        for (let k = 0; k < 7; k++) {
+          const d = tgt[o + k] - cur[o + k]
+          if (Math.abs(d) > 0.0008) {
+            cur[o + k] = damp(cur[o + k], tgt[o + k], RATES[k], dt)
+            moving = 1
+          } else {
+            cur[o + k] = tgt[o + k]
+          }
+        }
+        const t = THREE.MathUtils.clamp(intro * 2.1 - delay[ci] * 1.1, 0, 1)
+        cur[o + 7] = 1 - Math.pow(1 - t, 3)
+        const cell = plate.cells[ci]
+        const tx = (cell.row * plate.cols + cell.col) * 4
+        a[tx] = cur[o]
+        a[tx + 1] = cur[o + 1]
+        a[tx + 2] = cur[o + 2]
+        a[tx + 3] = cur[o + 3]
+        b[tx] = cur[o + 4]
+        b[tx + 1] = cur[o + 5]
+        b[tx + 2] = cur[o + 6]
+        b[tx + 3] = cur[o + 7]
+      }
+      cells.texA.needsUpdate = true
+      cells.texB.needsUpdate = true
+      // the light the whole board gives off, for the pool on the table
+      let cool = 0
+      let heat = 0
+      for (let ci = 0; ci < count; ci++) {
+        const o = ci * STRIDE
+        cool += cur[o + 2] * cur[o + 4] * cur[o + 7]
+        heat += cur[o + 3] * cur[o + 4] * cur[o + 7]
+      }
+      const inv = 1 / Math.max(1, count)
+      tmp.spill.copy(paletteUniform(u, 'cool')).multiplyScalar(cool * inv * 0.9)
+      u.uSpill.value.copy(tmp.spill).add(tmp.spill.copy(paletteUniform(u, 'hot')).multiplyScalar(heat * inv * 0.9))
+      s.settled = !moving && intro >= 1
+      dirty = true
+    }
+
+    /* ---- pose: route, then the home page's story pose as the reader scrolls ---- */
     s.scroll = damp(s.scroll, s.scrollTarget, 5, dt)
-
     const { width, height } = state.size
-    const portrait = 1 - THREE.MathUtils.smoothstep(width / Math.max(1, height), 0.72, 1.15)
-    const t = (u.uTime.value += dt)
+    const aspect = width / Math.max(1, height)
+    const portrait = 1 - THREE.MathUtils.smoothstep(aspect, 0.72, 1.15)
+    const pose = mixPose(tmp.pose, rig.wide, rig.tall, portrait)
+    if (s.hero) {
+      // the hero frames the board between its two control panels: on a short window
+      // the board gets a smaller share of the height and sits a little lower
+      if (s.freeFrame) {
+        // stills (scripts/capture-world.mjs): no panels to make room for
+        pose.fitH = 0.64
+      } else {
+        const share = THREE.MathUtils.clamp((height - 430) / Math.max(1, height), 0.26, 0.5)
+        pose.fitH = THREE.MathUtils.lerp(Math.min(pose.fitH, share), pose.fitH, portrait)
+        pose.ay += (1 - portrait) * (22 / Math.max(1, height))
+      }
+      const story = mixPose(tmp.story, STORY_POSE.wide, STORY_POSE.tall, portrait)
+      mixPose(pose, pose, story, THREE.MathUtils.smoothstep(s.scroll, 0.1, 0.8))
+    }
 
-    // ---- camera ----
-    const az = AZIMUTH + s.parX * 0.03
-    const el = ELEVATION - s.parY * 0.018
-    const { dir, right, up, target, origin, key } = tmp
+    /* ---- camera ---- */
+    s.turnAz = damp(s.turnAz, boardTurn.azimuth, 9, dt)
+    s.turnEl = damp(s.turnEl, boardTurn.elevation, 9, dt)
+    const az = pose.az + s.turnAz
+    const el = THREE.MathUtils.clamp(pose.el - s.turnEl, 0.28, 1.25)
+    const { dir, right, target, key, p, q } = tmp
     dir.set(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az))
     right.set(Math.cos(az), 0, -Math.sin(az))
-    up.crossVectors(dir, right)
-
-    const baseZoom = THREE.MathUtils.clamp(74 + width * 0.176, 130, 410)
-    const zoom = baseZoom * rig.zoom * (0.94 + 0.06 * rig.intro)
-    const worldW = width / zoom
-    const worldH = height / zoom
-    const ax =
-      THREE.MathUtils.lerp(rig.ax, rig.pax, portrait) + s.parX * 0.01 + Math.sin(t * 0.07) * 0.004
-    const ay =
-      THREE.MathUtils.lerp(rig.ay, rig.pay, portrait) - s.parY * 0.01 + Math.cos(t * 0.05) * 0.004 - s.scroll * 0.07
-    target
-      .set(rig.focusX, 0, rig.focusZ)
-      .addScaledVector(right, -(ax - 0.5) * worldW)
-      .addScaledVector(up, -(0.5 - ay) * worldH)
-    camera.position.copy(target).addScaledVector(dir, CAMERA_DISTANCE)
+    // framed for the resting pose: turning the board must not also zoom it
+    const halfW = (Math.abs(Math.cos(pose.az)) * plate.width + Math.abs(Math.sin(pose.az)) * plate.depth) / 2
+    const halfV =
+      ((Math.abs(Math.sin(pose.az)) * plate.width + Math.abs(Math.cos(pose.az)) * plate.depth) / 2) * Math.sin(pose.el) +
+      0.8 * Math.cos(pose.el)
+    const zoomIn = 0.94 + 0.06 * intro
+    const dist =
+      Math.max(halfW / (pose.fit * TAN_HALF_FOV * aspect), halfV / (pose.fitH * TAN_HALF_FOV)) / zoomIn
+    target.set(0, 0.3, 0)
+    camera.position.copy(target).addScaledVector(dir, dist)
     camera.up.set(0, 1, 0)
     camera.lookAt(target)
-    if ((camera as THREE.OrthographicCamera).isOrthographicCamera && camera.zoom !== zoom) {
-      camera.zoom = zoom
-      camera.updateProjectionMatrix()
+    const view = `${width}|${height}|${pose.ax.toFixed(4)}|${pose.ay.toFixed(4)}`
+    if (view !== s.lastView) {
+      s.lastView = view
+      camera.near = 1
+      camera.far = 400
+      camera.setViewOffset(width, height, (0.5 - pose.ax) * width, (0.5 - pose.ay) * height, width, height)
+    }
+    camera.updateMatrixWorld()
+
+    /* ---- draw order: far cells first, re-sorted only when the board has turned ---- */
+    if (!(Math.abs(az - geo.sortedFor) < 0.1)) {
+      geo.sortedFor = az
+      geo.order.sort((i, j) => {
+        const ci = plate.cells[i]
+        const cj = plate.cells[j]
+        return ci.x * dir.x + ci.z * dir.z - (cj.x * dir.x + cj.z * dir.z)
+      })
+      const cellArr = geo.cell.array as Float32Array
+      const baseArr = geo.base.array as Float32Array
+      geo.order.forEach((ci, slot) => {
+        const c = plate.cells[ci]
+        cellArr[slot * 2] = c.u
+        cellArr[slot * 2 + 1] = c.v
+        baseArr[slot * 3] = c.x
+        baseArr[slot * 3 + 1] = c.z
+        baseArr[slot * 3 + 2] = ((c.item * 0.61803) % 1) * 0.999
+      })
+      geo.cell.needsUpdate = true
+      geo.base.needsUpdate = true
     }
 
-    // ---- pointer on the board plane (hover lift) ----
-    if (s.hover > 0.001) {
-      origin
-        .copy(camera.position)
-        .addScaledVector(right, s.px * worldW * 0.5)
-        .addScaledVector(up, s.py * worldH * 0.5)
-      const k = dir.y > 1e-4 ? origin.y / dir.y : 0
-      const hx = origin.x - dir.x * k
-      const hz = origin.z - dir.z * k
-      u.uPointer.value.x = damp(u.uPointer.value.x, hx, 9, dt)
-      u.uPointer.value.y = damp(u.uPointer.value.y, hz, 9, dt)
-    }
-    u.uPointer.value.z = s.hover
-
-    // ---- uniforms ----
-    u.uW.value.set(rig.w0, rig.w1, rig.w2, rig.w3)
-    u.uIntro.value = rig.intro
-    u.uGlow.value = rig.glow * rig.glowIntro * (1 - s.scroll * 0.5)
-    u.uDim.value = rig.dim * (1 - s.scroll * 0.42)
-    u.uFocus.value.set(rig.focusX, rig.focusZ)
-    u.uViewDir.value.copy(dir)
-    key.copy(right).multiplyScalar(-0.62).addScaledVector(dir, 0.5)
-    key.y += 0.52
+    /* ---- uniforms ---- */
+    u.uGlow.value = pose.glow * rig.glowIntro
+    u.uDim.value = pose.dim
+    key.copy(right).multiplyScalar(-0.55).addScaledVector(dir, 0.3)
+    key.y = 0.72
     u.uKeyDir.value.copy(key.normalize())
-    u.uGradDir.value.set(key.x, key.z).normalize()
-    state.gl.getDrawingBufferSize(u.uRes.value)
+    u.uShadowDir.value.set(-key.x, -key.z).normalize()
 
-    const fade = u.uFade.value
-    const fl = Math.hypot(1 - portrait, portrait) || 1
-    fade.set((1 - portrait) / fl, portrait / fl, rig.fade, THREE.MathUtils.lerp(0, 0.03, portrait))
-
-    const weights = u.uW.value
-    const lights = u.uLights.value
-    for (let i = 0; i < lights.length; i++) {
-      const l = board.lights[i]
-      if (!l) {
-        lights[i].w = 0
-        continue
+    /* ---- tell the DOM where each cell is (only when something moved) ---- */
+    const rects = boardBridge.rects
+    const cam = `${az.toFixed(4)}|${el.toFixed(4)}|${dist.toFixed(3)}|${view}`
+    if (rects && (dirty || cam !== s.lastCam)) {
+      s.lastCam = cam
+      for (let ci = 0; ci < count; ci++) {
+        const cell = plate.cells[ci]
+        const o = ci * STRIDE
+        const lift = cells.cur[o + 5]
+        const top = cellHeight(cells.cur[o]) * cells.cur[o + 7] + CELL_SHOULDER + lift
+        p.set(cell.x, lift, cell.z).project(camera)
+        const bx = (p.x * 0.5 + 0.5) * width
+        const by = (0.5 - p.y * 0.5) * height
+        const depth = p.z
+        p.set(cell.x, top, cell.z).project(camera)
+        const ty = (0.5 - p.y * 0.5) * height
+        q.set(cell.x, top, cell.z).addScaledVector(right, CELL_RADIUS).project(camera)
+        const r = Math.abs((q.x - p.x) * 0.5 * width)
+        const k = cell.item * RECT_STRIDE
+        rects[k] = bx - r
+        rects[k + 1] = ty - r * 0.55
+        rects[k + 2] = r * 2
+        rects[k + 3] = by - ty + r * 1.1
+        rects[k + 4] = Math.round((1 - depth) * 100000)
       }
-      lights[i].set(l.x, l.y, l.z, l.intensity * weights.getComponent(l.scene))
+      boardBridge.frame++
     }
   })
 
+  const floorSize = Math.max(plate.width, plate.depth) + 26
+
   return (
     <>
-      <mesh geometry={slabGeometry} material={slabMaterial} frustumCulled={false} />
       <mesh
-        material={groundMaterial}
+        material={mats.floor}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -SLAB_HEIGHT - 0.012, 0]}
+        position={[0, -PLATE_THICKNESS - 0.01, 0]}
         frustumCulled={false}
+        renderOrder={0}
       >
-        <planeGeometry args={[groundSize, groundSize]} />
+        <planeGeometry args={[floorSize, floorSize]} />
       </mesh>
-      {quality === 'full' ? <Bloom uniforms={uniforms} /> : null}
+      <mesh geometry={geo.plate} material={mats.plate} frustumCulled={false} renderOrder={1} />
+      <mesh geometry={geo.core} material={mats.core} frustumCulled={false} renderOrder={2} />
+      <mesh geometry={geo.shell} material={mats.shellBack} frustumCulled={false} renderOrder={3} />
+      <mesh geometry={geo.shell} material={mats.shellFront} frustumCulled={false} renderOrder={4} />
+      <Post uniforms={uniforms} bloom={quality === 'full'} />
     </>
   )
 }
 
-/** Bloom built from three's own passes (no extra dependency). Rendering goes to a
- *  multisampled half-float target, so only emissive values above 1.0 bloom and
- *  the slab edges stay antialiased. Takes over the render loop (priority 1). */
-function Bloom({ uniforms }: { uniforms: ReturnType<typeof createWorldUniforms> }) {
+/** Renders through a multisampled half-float target so glass blends in linear light
+ *  on every tier, and (desktop) blooms what is brighter than 1.0. Built from three's
+ *  own passes — no extra dependency. Takes over the render loop (priority 1) and
+ *  falls back to a plain render if a pass ever throws. */
+function Post({ uniforms, bloom }: { uniforms: WorldUniforms; bloom: boolean }) {
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
   const camera = useThree((s) => s.camera)
@@ -354,14 +500,14 @@ function Bloom({ uniforms }: { uniforms: ReturnType<typeof createWorldUniforms> 
       const target = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: 4 })
       const composer = new EffectComposer(gl, target)
       composer.addPass(new RenderPass(scene, camera))
-      const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.3, 0.18, 0.9)
-      composer.addPass(bloom)
+      const pass = bloom ? new UnrealBloomPass(new THREE.Vector2(256, 256), 0.4, 0.3, 0.8) : null
+      if (pass) composer.addPass(pass)
       composer.addPass(new OutputPass())
-      return { composer, bloom, target }
+      return { composer, pass, target }
     } catch {
       return null
     }
-  }, [gl, scene, camera])
+  }, [gl, scene, camera, bloom])
 
   useEffect(() => {
     if (!rig) return
@@ -381,10 +527,12 @@ function Bloom({ uniforms }: { uniforms: ReturnType<typeof createWorldUniforms> 
   useFrame((state) => {
     if (rig && !failed.current) {
       try {
-        // light theme: a pale ground would bloom into white, so the halo backs off
-        const theme = uniforms.uTheme.value
-        rig.bloom.strength = THREE.MathUtils.lerp(0.3, 0.12, theme)
-        rig.bloom.threshold = THREE.MathUtils.lerp(0.9, 0.98, theme)
+        if (rig.pass) {
+          // light theme: a pale ground would bloom into white, so the halo backs off
+          const theme = uniforms.uTheme.value
+          rig.pass.strength = THREE.MathUtils.lerp(0.36, 0.1, theme)
+          rig.pass.threshold = THREE.MathUtils.lerp(0.8, 0.98, theme)
+        }
         rig.composer.render()
         return
       } catch {

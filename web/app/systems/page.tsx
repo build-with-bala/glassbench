@@ -9,6 +9,7 @@ import { Breadcrumbs } from '../../components/platform/Breadcrumbs'
 import { PageHead } from '../../components/platform/PageHead'
 import { KindBadge } from '../../components/platform/Badges'
 import { OutcomeBar } from '../../components/systems/OutcomeBar'
+import { BoardHover } from '../../components/board/BoardBinding'
 import ui from '../../components/platform/ui.module.css'
 import css from '../../components/systems/systems.module.css'
 
@@ -22,7 +23,7 @@ export const metadata = pageMetadata({
 function SystemCardLink({ card }: { card: SystemCard }) {
   const { row, summary } = card
   return (
-    <li>
+    <BoardHover as="li" system={card.system}>
       <GlassPanel className={`${css.sysCard} ${card.kind === 'reference' ? css.sysCardRef : ''}`}>
         <div className={css.sysTop}>
           <Link href={systemHref(card.system)} className={`${css.sysName} ${ui.link}`}>
@@ -52,7 +53,7 @@ function SystemCardLink({ card }: { card: SystemCard }) {
           <OutcomeBar counts={summary.outcome_counts} legend={false} />
         </div>
       </GlassPanel>
-    </li>
+    </BoardHover>
   )
 }
 

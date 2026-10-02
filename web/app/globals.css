@@ -1,86 +1,96 @@
 /* ============================================================================
-   GlassBench — frosted-slab design tokens (dark is the hero theme; light is
-   co-equal). One accent: lime-chartreuse, the colour of a slab lit from inside.
+   GlassBench — design tokens (dark is the hero theme; light is co-equal).
+
+   The site is a bench of glass. Surfaces are smoked glass on a cool near-black;
+   the one brand accent is a very light, icy blue — the calm light inside a cell
+   whose answer was right. The colour of "confidently wrong" is an ember, and it
+   is `--danger`, not the accent.
 
    Token names are a contract: pages and components are written against them, so
    retune values freely but never rename. `--cyan` is the historical name of the
-   brand accent and now simply points at `--accent`.
+   brand accent and simply points at `--accent`.
 
-   The WebGL world keeps a matching palette in components/world/slabMaterial.ts —
+   The WebGL board keeps a matching palette in components/world/materials.ts —
    `--bg` must stay equal to PALETTE.<theme>.bg or the canvas shows a seam.
    ========================================================================== */
 
 :root,
 .light {
   color-scheme: light;
-  --bg: #edeee8;
-  --bg-2: #e3e5dc;
-  --ink: #11130e;
-  --muted: #53584a;
-  --faint: #6d7263;
-  --border: rgba(17, 19, 14, 0.12);
-  --border-strong: rgba(17, 19, 14, 0.22);
+  --bg: #edf0f5;
+  --bg-2: #e2e7ef;
+  --ink: #0d131e;
+  --muted: #4a5467;
+  --faint: #667185;
+  --border: rgba(13, 19, 30, 0.12);
+  --border-strong: rgba(13, 19, 30, 0.24);
 
-  --glass-bg: rgba(252, 253, 249, 0.62);
-  --glass-bg-2: rgba(255, 255, 255, 0.72);
+  --glass-bg: rgba(250, 252, 255, 0.64);
+  --glass-bg-2: rgba(255, 255, 255, 0.76);
   --glass-blur: 22px;
   --glass-spec: rgba(255, 255, 255, 0.95);
-  --glass-shadow: 0 1px 2px rgba(17, 19, 14, 0.04), 0 28px 64px -34px rgba(46, 54, 18, 0.34);
+  --glass-shadow: 0 1px 2px rgba(13, 19, 30, 0.04), 0 28px 64px -34px rgba(30, 60, 110, 0.32);
+  --glare: rgba(255, 255, 255, 0.7);
 
-  /* accent: text-safe on pale surfaces / bright for fills and glow */
-  --accent: #4d6200;
-  --accent-bright: #c6e63e;
-  --on-accent: #161b00;
-  --accent-glow: rgba(150, 190, 20, 0.34);
-  --accent-wash: rgba(170, 205, 40, 0.2);
+  /* accent: on a pale surface the icy blue needs a darker step of the same hue to
+     stay readable — text, links, focus rings and filled buttons use these */
+  --accent: #0b5aa6;
+  --accent-bright: #1668bf;
+  --on-accent: #ffffff;
+  --accent-soft: #bfe0ff;
+  --accent-glow: rgba(40, 130, 230, 0.32);
+  --accent-wash: rgba(60, 140, 235, 0.12);
   --cyan: var(--accent);
 
-  /* semantic ramp for metric cells — deliberately off the lime hue */
-  --good: #087a60;
-  --warn: #b0560a;
-  --danger: #c22a45;
+  /* semantic ramp for metric cells and outcomes — green / amber / ember, each
+     clear of the blue accent and of the others; every use also carries a glyph */
+  --good: #12733c;
+  --warn: #8f5a00;
+  --danger: #c2311c;
 
-  --tint-good: rgba(8, 122, 96, 0.13);
-  --tint-warn: rgba(176, 86, 10, 0.14);
-  --tint-danger: rgba(194, 42, 69, 0.13);
+  --tint-good: rgba(18, 115, 60, 0.12);
+  --tint-warn: rgba(160, 100, 0, 0.14);
+  --tint-danger: rgba(194, 49, 28, 0.12);
 
-  --hover: rgba(17, 19, 14, 0.06);
-  --scrim: rgba(237, 238, 232, 0.86);
+  --hover: rgba(13, 19, 30, 0.06);
+  --scrim: rgba(237, 240, 245, 0.88);
 }
 
 .dark {
   color-scheme: dark;
-  --bg: #0f100e;
-  --bg-2: #151613;
-  --ink: #f4f5ef;
-  --muted: #a5a99a;
-  --faint: #7c8073;
-  --border: rgba(255, 255, 255, 0.085);
-  --border-strong: rgba(255, 255, 255, 0.16);
+  --bg: #0b0d12;
+  --bg-2: #12151c;
+  --ink: #f1f4f9;
+  --muted: #a2abbb;
+  --faint: #7a8496;
+  --border: rgba(196, 220, 255, 0.1);
+  --border-strong: rgba(196, 220, 255, 0.2);
 
-  --glass-bg: rgba(20, 21, 18, 0.62);
-  --glass-bg-2: rgba(34, 36, 31, 0.72);
+  --glass-bg: rgba(15, 18, 25, 0.64);
+  --glass-bg-2: rgba(30, 35, 47, 0.74);
   --glass-blur: 22px;
-  --glass-spec: rgba(255, 255, 255, 0.07);
+  --glass-spec: rgba(206, 228, 255, 0.08);
   --glass-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.85);
+  --glare: rgba(190, 220, 255, 0.075);
 
-  --accent: #d3ea52;
-  --accent-bright: #d3ea52;
-  --on-accent: #151900;
-  --accent-glow: rgba(200, 230, 60, 0.3);
-  --accent-wash: rgba(200, 230, 60, 0.1);
+  --accent: #a9d8ff;
+  --accent-bright: #a9d8ff;
+  --on-accent: #06131f;
+  --accent-soft: #a9d8ff;
+  --accent-glow: rgba(120, 190, 255, 0.34);
+  --accent-wash: rgba(130, 195, 255, 0.1);
   --cyan: var(--accent);
 
-  --good: #4fd8ab;
-  --warn: #f59e4b;
-  --danger: #f4667f;
+  --good: #62d58c;
+  --warn: #f0b443;
+  --danger: #ff6a55;
 
-  --tint-good: rgba(79, 216, 171, 0.13);
-  --tint-warn: rgba(245, 158, 75, 0.13);
-  --tint-danger: rgba(244, 102, 127, 0.14);
+  --tint-good: rgba(98, 213, 140, 0.13);
+  --tint-warn: rgba(240, 180, 67, 0.13);
+  --tint-danger: rgba(255, 106, 85, 0.15);
 
-  --hover: rgba(255, 255, 255, 0.06);
-  --scrim: rgba(15, 16, 14, 0.82);
+  --hover: rgba(196, 220, 255, 0.07);
+  --scrim: rgba(11, 13, 18, 0.84);
 }
 
 :root {
@@ -182,9 +192,28 @@ output {
   border-radius: 4px;
 }
 
-/* ---- the glass panel primitive: a smoked, frosted slab ---- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- the glass panel primitive: a pane of smoked glass ----
+   --gx / --gy are set (by components/ui/Glare) on the panel under the pointer, so
+   light slides across the pane as you move over it. */
 .glass-panel {
-  background: var(--glass-bg);
+  background-color: var(--glass-bg);
+  background-image: radial-gradient(
+    22rem circle at var(--gx, -100rem) var(--gy, -100rem),
+    var(--glare),
+    transparent 65%
+  );
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.25);
   backdrop-filter: blur(var(--glass-blur)) saturate(1.25);
   border: 1px solid var(--border);
@@ -299,7 +328,7 @@ output {
   text-decoration: none;
   color: var(--ink);
 }
-/* the mark: a lit slab floating over a second layer */
+/* the mark: one glass cell with its column of light */
 .site-nav .brand::before,
 .site-nav .brand::after {
   content: '';
@@ -313,11 +342,11 @@ output {
   mask: var(--mark) center / contain no-repeat;
 }
 .site-nav .brand::before {
-  --mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.4 3.2a3.2 3.2 0 0 1 3.2 0l6.5 3.75c1.2.7 1.2 2.4 0 3.1l-6.5 3.75a3.2 3.2 0 0 1-3.2 0L3.9 10.05c-1.2-.7-1.2-2.4 0-3.1z'/%3E%3C/svg%3E");
+  --mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='10.3' y='8.6' width='3.4' height='9.2' rx='1.7'/%3E%3C/svg%3E");
   background: var(--accent-bright);
 }
 .site-nav .brand::after {
-  --mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.1 14.6l6.3 3.65a3.2 3.2 0 0 0 3.2 0l6.3-3.65'/%3E%3C/svg%3E");
+  --mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.6 19.6V9.4a5.4 5.4 0 0 1 10.8 0v10.2M3.8 20.2h16.4'/%3E%3C/svg%3E");
   background: var(--ink);
 }
 .site-nav .brand span {
@@ -370,13 +399,74 @@ output {
   flex: 0 0 auto;
   margin-left: 0.35rem;
 }
+/* the command palette's button */
+.nav-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 38px;
+  padding: 0 0.55rem 0 0.7rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--glass-bg-2);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.nav-search:hover {
+  color: var(--ink);
+  border-color: var(--border-strong);
+}
+.nav-search kbd {
+  font-size: 0.68rem;
+  line-height: 1;
+  padding: 0.2rem 0.36rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  color: var(--faint);
+}
+.nav-search-icon {
+  width: 0.72rem;
+  height: 0.72rem;
+  border: 1.6px solid currentColor;
+  border-radius: 50%;
+  position: relative;
+}
+.nav-search-icon::after {
+  content: '';
+  position: absolute;
+  right: -0.3rem;
+  bottom: -0.22rem;
+  width: 0.36rem;
+  height: 1.6px;
+  background: currentColor;
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
 /* narrow screens: the mark stands in for the wordmark and the links become a
    swipeable row, so any number of links fits; the theme toggle stays put. */
 @media (max-width: 860px) {
   .site-nav {
     gap: 0.4rem;
     padding-left: 0.8rem;
-    padding-right: 3.3rem;
+    padding-right: 6.1rem;
+  }
+  .nav-search-text,
+  .nav-search kbd {
+    display: none;
+  }
+  .nav-search {
+    width: 38px;
+    padding: 0;
+    justify-content: center;
+  }
+  .site-nav .nav-links > .nav-search {
+    position: absolute;
+    right: 3.2rem;
+    top: calc(50% - 19px);
+    margin: 0;
   }
   .site-nav .brand {
     width: 1.5rem;
@@ -401,7 +491,7 @@ output {
     z-index: 1;
     background: var(--bg-2);
   }
-  .site-nav .nav-links > button {
+  .site-nav .nav-links > .theme-toggle {
     position: absolute;
     right: 0.5rem;
     top: calc(50% - 19px);
@@ -433,6 +523,219 @@ output {
   text-decoration-color: currentColor;
 }
 
+/* ============================================================================
+   Home: the hero instrument and the story beside the board
+   ========================================================================== */
+
+/* The home page lets the pointer through to the board wherever it has nothing of
+   its own: the links laid over the glass cells sit under this layer. */
+.home-main {
+  padding: 1rem 0 0;
+  pointer-events: none;
+}
+.home-main > * {
+  pointer-events: auto;
+}
+.home-main > .hero {
+  pointer-events: none;
+}
+
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 37rem) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'copy top'
+    'copy .'
+    'copy bottom';
+  column-gap: clamp(1rem, 3vw, 3rem);
+  min-height: calc(100svh - 5.6rem);
+  padding: clamp(0.9rem, 2.4vh, 1.6rem) var(--edge) clamp(1.6rem, 5vh, 3.2rem);
+}
+.hero-copy {
+  grid-area: copy;
+  align-self: end;
+  pointer-events: auto;
+}
+.hero-panel {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: end;
+  justify-self: end;
+  max-width: min(100%, 52rem);
+  pointer-events: auto;
+}
+.hero-panel-top {
+  grid-area: top;
+  text-align: right;
+}
+.hero-panel-top [role='radiogroup'] {
+  justify-content: flex-end;
+}
+.hero-panel-top dl {
+  justify-content: flex-end;
+  margin-top: 0.3rem;
+}
+.hero-panel-bottom {
+  /* the legend may run wider than the instrument column: it sits below the copy's
+     last line of text, level with the buttons */
+  grid-row: 3;
+  grid-column: 1 / -1;
+  max-width: min(100%, 50rem);
+}
+.hero-panel-bottom ul {
+  justify-content: flex-end;
+}
+.hero-panel-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.9rem;
+  text-align: right;
+}
+
+.hero-q1 {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 1.25vw, 1.08rem);
+  letter-spacing: -0.01em;
+}
+.hero-dot {
+  flex: 0 0 auto;
+  width: 0.42rem;
+  height: 0.9rem;
+  margin-top: 0.3em;
+  border-radius: 999px;
+  background: var(--accent-bright);
+  box-shadow: 0 0 14px 2px var(--accent-glow);
+}
+.hero-q2 {
+  margin: 1.05rem 0 0;
+  max-width: 7.2em;
+  font-size: clamp(3rem, 5.5vw, 5.6rem);
+  font-weight: 540;
+  line-height: 0.93;
+  letter-spacing: -0.055em;
+}
+.hero-lede {
+  color: var(--muted);
+  max-width: 34rem;
+  font-size: clamp(0.96rem, 1.15vw, 1.05rem);
+  line-height: 1.58;
+  margin: 1.5rem 0 0;
+}
+.hero-lede em {
+  color: var(--ink);
+  font-style: normal;
+}
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1.8rem;
+}
+
+/* a wide but short window: keep the controls clear of the board */
+@media (min-width: 861px) and (max-height: 820px) {
+  .hero-q2 {
+    font-size: clamp(2.6rem, 5.2vw, 4.6rem);
+    max-width: 9em;
+  }
+  .hero-lede {
+    margin-top: 1rem;
+  }
+  .hero-cta {
+    margin-top: 1.2rem;
+  }
+}
+
+/* phones and narrow windows: the board takes the top of the screen, then the
+   system picker, the headline, and the legend, in reading order */
+@media (max-width: 860px) {
+  .hero {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    min-height: 0;
+    padding-top: 37svh;
+    padding-bottom: 1.6rem;
+  }
+  .hero-copy {
+    align-self: stretch;
+  }
+  .hero-panel {
+    justify-items: start;
+    justify-self: stretch;
+    max-width: 100%;
+  }
+  .hero-panel-top {
+    text-align: left;
+  }
+  .hero-panel-top [role='radiogroup'],
+  .hero-panel-top dl,
+  .hero-panel-bottom ul,
+  .hero-panel-foot {
+    justify-content: flex-start;
+  }
+  .hero-panel-foot {
+    text-align: left;
+  }
+  /* one swipeable row of systems instead of three wrapped ones */
+  .hero-panel-top [role='radiogroup'] {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: calc(var(--edge) * -1);
+    padding-inline: var(--edge);
+    max-width: 100vw;
+  }
+  .hero-panel-top [role='radiogroup']::-webkit-scrollbar {
+    display: none;
+  }
+  .hero-panel-top [role='radio'] {
+    flex: 0 0 auto;
+  }
+  .hero-q2 {
+    font-size: clamp(2.8rem, 13.5vw, 4.2rem);
+  }
+  .hero-panel-top dl {
+    gap: 0.6rem 1.1rem;
+  }
+}
+
+/* ---- the story column ---- */
+.story {
+  width: min(100% - 2 * var(--edge), 1080px);
+  margin: 0 auto;
+}
+@media (min-width: 1100px) {
+  /* sections run down the left; the board keeps the right of the viewport */
+  .story {
+    width: min(46rem, 56vw);
+    margin-left: var(--edge);
+  }
+}
+
+/* the board can be dragged round wherever the page shows it bare */
+html.board-live .content-root {
+  cursor: grab;
+}
+html.board-live .content-root > * {
+  cursor: auto;
+}
+html.board-dragging,
+html.board-dragging * {
+  cursor: grabbing !important;
+  user-select: none;
+}
+html.board-live body {
+  touch-action: pan-y pinch-zoom;
+}
+
 /* reveal-on-scroll */
 [data-reveal] {
   opacity: 0;
@@ -462,6 +765,13 @@ output {
    ========================================================================== */
 .datasheet-head {
   margin-bottom: 1.4rem;
+}
+/* like every results page, the head leaves the top right of a wide screen to the board */
+@media (min-width: 1100px) {
+  .datasheet-head {
+    width: calc(100% - min(30rem, 36vw));
+    min-height: 15.5rem;
+  }
 }
 
 .datasheet-layout {

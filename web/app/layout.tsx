@@ -6,8 +6,11 @@ import { GlassWorldMount } from '../components/world/GlassWorldMount'
 import { SmoothScroll } from '../components/motion/SmoothScroll'
 import { Nav } from '../components/ui/Nav'
 import { Footer } from '../components/ui/Footer'
+import { CommandPalette } from '../components/ui/CommandPalette'
+import { Glare } from '../components/ui/Glare'
 import { SITE_URL, REPO_URL } from '../lib/site'
-import { getLeaderboard } from '../lib/glassbench-data'
+import { getBoardData } from '../lib/world-data'
+import { BoardDataProvider } from '../components/world/BoardDataProvider'
 
 /* Self-hosted by next/font: the files are fetched at build time and served from
    this origin — no runtime request to a font CDN, no external stylesheet. */
@@ -43,8 +46,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0f100e' },
-    { media: '(prefers-color-scheme: light)', color: '#edeee8' },
+    { media: '(prefers-color-scheme: dark)', color: '#0b0d12' },
+    { media: '(prefers-color-scheme: light)', color: '#edf0f5' },
   ],
 }
 
@@ -73,8 +76,9 @@ const jsonLd = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // the world draws one slab per benchmark item; counts come from the scorer output
-  const { split_counts } = getLeaderboard()
+  // the glass board draws one cell per benchmark item and shows each system's
+  // scorer-assigned outcome on it; this is the pipeline's export, reshaped, with no gold
+  const board = getBoardData()
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <body>
@@ -83,14 +87,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <a className="skip-link" href="#main">
             Skip to content
           </a>
-          <GlassWorldMount counts={split_counts} />
-          <SmoothScroll>
-            <div className="content-root">
-              <Nav />
-              {children}
-              <Footer />
-            </div>
-          </SmoothScroll>
+          <BoardDataProvider data={board}>
+            <GlassWorldMount />
+            <SmoothScroll>
+              <div className="content-root">
+                <Nav />
+                {children}
+                <Footer />
+              </div>
+            </SmoothScroll>
+            <CommandPalette />
+            <Glare />
+          </BoardDataProvider>
         </ThemeProvider>
       </body>
     </html>

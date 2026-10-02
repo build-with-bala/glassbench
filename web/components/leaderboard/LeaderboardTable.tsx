@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import type { Metric, RankedRow } from '../../lib/types'
 import { goodness, rampTint } from '../../lib/color-ramp'
@@ -9,6 +9,7 @@ import { systemHref } from '../../lib/routes'
 import { CountUp } from '../ui/CountUp'
 import { CopyButton } from '../ui/CopyButton'
 import { MetricTip } from '../ui/MetricTip'
+import { boardStore } from '../world/store'
 
 interface Props {
   rows: RankedRow[]
@@ -27,6 +28,14 @@ const isActivate = (key: string) => key === 'Enter' || key === ' '
 export function LeaderboardTable({ rows, metrics, ranges, primaryKey, headlineKey }: Props) {
   const [sortKey, setSortKey] = useState<string>(primaryKey)
   const [expanded, setExpanded] = useState<string | null>(null)
+
+  // The board beside the page head shows a system's item-by-item pattern: the row
+  // under the pointer or holding focus, else the row whose details are open, else
+  // the leader.
+  useEffect(() => {
+    boardStore.setBase({ system: expanded ?? undefined })
+    return () => boardStore.resetBase()
+  }, [expanded])
 
   const sorted = useMemo(() => {
     const metric = metrics.find((m) => m.key === sortKey)
@@ -77,7 +86,14 @@ export function LeaderboardTable({ rows, metrics, ranges, primaryKey, headlineKe
                 <Fragment key={row.system}>
                   <tr
                     className={`lb-row ${isOpen ? 'is-open' : ''}`}
+                    data-system={row.system}
                     onClick={() => setExpanded(isOpen ? null : row.system)}
+                    onPointerEnter={(e) => {
+                      if (e.pointerType !== 'touch') boardStore.setPreview({ system: row.system })
+                    }}
+                    onPointerLeave={() => boardStore.setPreview(null)}
+                    onFocus={() => boardStore.setPreview({ system: row.system })}
+                    onBlur={() => boardStore.setPreview(null)}
                   >
                     {/* The official rank (ties share one) while the board is in ranking order;
                         the row's position once it is re-sorted by another metric. */}
@@ -193,7 +209,8 @@ export function LeaderboardTable({ rows, metrics, ranges, primaryKey, headlineKe
           width: 2.4rem;
           color: var(--faint);
         }
-        .col-system {
+        .lb-table th.col-system,
+        .lb-table td.col-system {
           text-align: left;
         }
         th.is-headline {

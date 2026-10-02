@@ -1,1 +1,1 @@
-GlassBench — Does it know when it didn’t? A grid of dark frosted-glass slabs with one cluster lit lime from inside.
+GlassBench — Does it know when it didn’t? A plate of glass cells, one per benchmark item: clear cells lit pale blue, frosted cells dark, and a few burning orange where a system was confidently wrong.

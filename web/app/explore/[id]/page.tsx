@@ -15,6 +15,7 @@ import { exploreHref, itemHref, systemHref } from '../../../lib/routes'
 import { GlassPanel } from '../../../components/ui/GlassPanel'
 import { Breadcrumbs } from '../../../components/platform/Breadcrumbs'
 import { PageHead } from '../../../components/platform/PageHead'
+import { BoardBinding, BoardHover } from '../../../components/board/BoardBinding'
 import { OutcomeBadge, SplitBadge } from '../../../components/platform/Badges'
 import { HistoryView } from '../../../components/explore/HistoryView'
 import { ItemReveal } from '../../../components/explore/ItemReveal'
@@ -68,6 +69,8 @@ export default async function ItemPage({ params }: { params: Params }) {
 
   return (
     <main id="main" className={ui.page}>
+      {/* the board singles this item's cell out; a system's row shows that system */}
+      <BoardBinding focus={item.id} />
       <Breadcrumbs
         trail={[
           { label: 'Explore', href: '/explore' },
@@ -116,7 +119,7 @@ export default async function ItemPage({ params }: { params: Params }) {
           </p>
           <ul className={css.outcomes} aria-label={`Each system’s outcome on item ${item.id}`}>
             {rows.map((r) => (
-              <li key={r.system}>
+              <BoardHover as="li" key={r.system} system={r.system}>
                 <span className={css.outcomeWho}>
                   <Link className={`${ui.link} ${ui.mono}`} href={systemHref(r.system)}>
                     {r.system}
@@ -136,7 +139,7 @@ export default async function ItemPage({ params }: { params: Params }) {
                     {r.result.abstention ? ABSTENTION_LABEL[r.result.abstention] : 'answered'}
                   </span>
                 </span>
-              </li>
+              </BoardHover>
             ))}
           </ul>
         </GlassPanel>
