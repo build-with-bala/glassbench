@@ -13,7 +13,7 @@ A submission is **rejected** (per CONTRIBUTING.md) if it:
   ``{"id", "answer", "confidence"}`` (answered) or ``{"id", "abstain": true}`` (abstained);
 * has a ``confidence`` outside ``[0, 1]`` (or non-numeric);
 * contains duplicate ``id``s;
-* contains an ``id`` not present in the scored data version;
+* contains an ``id`` that is not a string, or not present in the scored data version;
 * leaks gold: a prediction row carries any label/gold field
   (``gold_answer``, ``split``, ``evidence_spans``, ``answer_topic``, ``source_id``),
   or the file otherwise smuggles the dataset's gold (e.g. an answer that is byte-identical
@@ -132,6 +132,13 @@ def validate(preds_path: str, gold: dict) -> tuple[list[str], list[str]]:
         item_id = row["id"]
         loc = f"row {idx} (id={item_id!r})"
 
+        # id is a string. (Every id in the data is one; a list/object id is not even
+        # hashable, so without this guard it would crash the checks below instead of
+        # being reported.)
+        if not isinstance(item_id, str):
+            errors.append(f"{loc}: 'id' must be a string, got {type(item_id).__name__}")
+            continue
+
         # id is in the scored data version
         if item_id not in valid_ids:
             errors.append(f"{loc}: id is not present in the scored data version")
@@ -182,7 +189,10 @@ def validate(preds_path: str, gold: dict) -> tuple[list[str], list[str]]:
                 if isinstance(conf, bool) or not isinstance(conf, (int, float)):
                     errors.append(f"{loc}: 'confidence' must be a number in [0,1], got {conf!r}")
                 else:
-                    cf = float(conf)
+                    try:
+                        cf = float(conf)
+                    except OverflowError:  # an integer literal too large for a float
+                        cf = float("inf")
                     if not (CONF_MIN <= cf <= CONF_MAX):
                         errors.append(
                             f"{loc}: 'confidence' {cf} is outside [0,1]"
@@ -216,7 +226,7 @@ def validate(preds_path: str, gold: dict) -> tuple[list[str], list[str]]:
         )
 
     # --- coverage warnings (NOT errors — missing ids are scored as abstentions) ---
-    listed = {r["id"] for r in raw if isinstance(r, dict) and "id" in r}
+    listed = {r["id"] for r in raw if isinstance(r, dict) and isinstance(r.get("id"), str)}
     missing = valid_ids - listed
     if missing:
         warnings.append(

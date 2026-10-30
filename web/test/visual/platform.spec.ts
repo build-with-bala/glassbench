@@ -1,0 +1,411 @@
+import { test, expect, type Locator, type Page } from '@playwright/test'
+
+/* Behaviour of the platform routes: system pages, the item explorer, compare, the
+ * in-browser predictions checker, the public JSON endpoints and the 404 page. Runs in
+ * both projects (1440 desktop, 390 mobile).
+ *
+ * Controls are operated from the keyboard (focus, then Enter or Space) rather than by
+ * pointer: it proves every control on these pages is keyboard-operable. */
+
+const ITEM = 'gb-stale-07741c44' // gold: "under my bed"
+const UNANSWERABLE = 'gb-contradiction-07741c44' // gold: ABSTAIN
+
+async function allItemIds(page: Page): Promise<string[]> {
+  const res = await page.request.get('/api/items.json')
+  expect(res.ok()).toBe(true)
+  return ((await res.json()) as { items: Array<{ id: string }> }).items.map((it) => it.id)
+}
+
+const jsonFile = (name: string, body: string) => ({ name, mimeType: 'application/json', buffer: Buffer.from(body) })
+
+/** Operate a control the way a keyboard user does. */
+async function activate(target: Locator, key: 'Enter' | 'Space' = 'Enter') {
+  await target.focus()
+  await expect(target).toBeFocused()
+  await target.press(key)
+}
+
+/** Choose an option of one of the site's custom selects (a select-only combobox) from
+ *  the keyboard: open it, arrow to the option, press Enter. */
+async function choose(select: Locator, value: string) {
+  await select.focus()
+  await expect(select).toBeFocused()
+  await select.press('Enter')
+  await expect(select).toHaveAttribute('aria-expanded', 'true')
+  const steps = await select.evaluate((el, want) => {
+    const list = document.getElementById(el.getAttribute('aria-controls')!)!
+    const options = [...list.querySelectorAll('[role="option"]')]
+    const active = options.findIndex((o) => o.id === el.getAttribute('aria-activedescendant'))
+    const target = options.findIndex((o) => o.textContent!.trim().replace(/^✓/, '').trim().split(' ')[0] === want)
+    return target < 0 ? null : target - active
+  }, value)
+  expect(steps, `option starting with "${value}"`).not.toBeNull()
+  for (let i = 0; i < Math.abs(steps!); i++) await select.press(steps! > 0 ? 'ArrowDown' : 'ArrowUp')
+  await select.press('Enter')
+  await expect(select).toHaveAttribute('aria-expanded', 'false')
+}
+
+/* ------------------------------------------------------------------ systems */
+
+test.describe('system pages', () => {
+  test('a ranked system page shows real scorer data', async ({ page }) => {
+    await page.goto('/systems/agent_llm')
+    await expect(page.getByRole('heading', { level: 1, name: 'agent_llm' })).toBeVisible()
+
+    // Metrics: the published values, each with its tooltip.
+    const metrics = page.locator('section', { has: page.getByRole('heading', { name: 'Metrics' }) })
+    await expect(metrics.getByText('54.34')).toBeVisible()
+    await expect(metrics.getByText('0.062')).toBeVisible()
+    await expect(metrics.getByRole('tooltip')).toHaveCount(11)
+    await expect(metrics.getByRole('tooltip').first()).toContainText(/harmonic mean/i)
+
+    // Rank context, per-split breakdown, reproduce command, system card.
+    await expect(page.getByText('Rank 1 of 5 ranked systems')).toBeVisible()
+    const table = page.getByRole('table', { name: /per-split breakdown for agent_llm/i })
+    await expect(table.getByRole('row')).toHaveCount(5) // header + 4 splits
+    await expect(table.getByRole('rowheader', { name: 'false-premise' })).toBeVisible()
+    const reproduce = page.locator('section[aria-labelledby="repro-h"]')
+    await expect(reproduce.getByText('python baselines/agent_llm.py', { exact: true })).toBeVisible()
+    await expect(reproduce.getByRole('button', { name: 'Copy: python baselines/agent_llm.py' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /agent_llm — genuine \(imperfect\)/ })).toBeVisible()
+
+    // Per-item outcomes: 96 rows, filterable.
+    const items = page.locator('section', { has: page.getByRole('heading', { name: 'Per-item outcomes' }) })
+    await expect(items.getByRole('status')).toHaveText('96 of 96 items')
+    await choose(items.getByLabel('Outcome', { exact: true }), 'Confidently')
+    await expect(items.getByRole('status')).toHaveText('6 of 96 items')
+    await expect(items.getByRole('listitem')).toHaveCount(6)
+    await choose(items.getByLabel('Split', { exact: true }), 'contradiction')
+    await expect(items.getByRole('status')).toHaveText('0 of 96 items')
+    await expect(items.getByText(/no items with this combination/i)).toBeVisible()
+    await activate(items.getByRole('button', { name: 'Clear filters' }))
+    await expect(items.getByRole('status')).toHaveText('96 of 96 items')
+  })
+
+  test('a reference system is shown as a ceiling, not a rank', async ({ page }) => {
+    await page.goto('/systems/abstention_aware_llm')
+    await expect(page.getByText(/reference ceiling · not ranked/i).first()).toBeVisible()
+    await expect(page.getByText('99.07').first()).toBeVisible()
+    await expect(page.getByText(/not regenerated by a script/i)).toBeVisible()
+  })
+
+  test('an unknown system is a 404', async ({ page }) => {
+    const res = await page.goto('/systems/not-a-system')
+    expect(res?.status()).toBe(404)
+    await expect(page.getByRole('heading', { level: 1, name: /nothing at this address/i })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Go to the overview' })).toBeVisible()
+  })
+
+  test('leaderboard rows link to system pages, and details open from the keyboard', async ({ page }) => {
+    await page.goto('/leaderboard')
+    const toggle = page.getByRole('button', { name: /details for agent_llm/i })
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await activate(toggle)
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    await expect(page.getByRole('link', { name: /full system page/i })).toBeVisible()
+
+    await activate(page.getByRole('link', { name: 'agent_llm', exact: true }))
+    await expect(page).toHaveURL(/\/systems\/agent_llm$/)
+    await expect(page.getByRole('heading', { level: 1, name: 'agent_llm' })).toBeVisible()
+  })
+})
+
+/* ------------------------------------------------------------------ explore */
+
+test.describe('item explorer', () => {
+  test('filters by split, outcome and text, and keeps the view in the URL', async ({ page }) => {
+    await page.goto('/explore')
+    const browser = page.getByRole('search', { name: 'Filter items' })
+    const status = page.getByRole('status').filter({ hasText: /^Showing/ })
+    await expect(status).toHaveText('Showing 96 of 96 items')
+
+    await choose(browser.getByLabel('Split', { exact: true }), 'contradiction')
+    await expect(status).toHaveText('Showing 12 of 96 items')
+    await expect(page).toHaveURL(/split=contradiction/)
+
+    await choose(browser.getByLabel('Outcome', { exact: true }), 'Confidently')
+    await choose(browser.getByLabel('For system', { exact: true }), 'always_answer')
+    await expect(status).toContainText('Showing 12 of 96 items')
+    await expect(page).toHaveURL(/outcome=confidently_wrong/)
+    await expect(page).toHaveURL(/system=always_answer/)
+
+    await browser.getByLabel('Search id or query text').fill('sneakers')
+    await expect(status).toContainText('Showing 1 of 96 items')
+    await expect(page.getByRole('link', { name: UNANSWERABLE })).toBeVisible()
+
+    await browser.getByLabel('Search id or query text').fill('zzz no such item')
+    await expect(page.getByText('No items match these filters.')).toBeVisible()
+    await activate(page.getByRole('button', { name: 'Clear filters' }).first())
+    await expect(status).toHaveText('Showing 96 of 96 items')
+    await expect(page).toHaveURL(/\/explore$/)
+  })
+
+  test('a filtered view opens from its URL', async ({ page }) => {
+    await page.goto('/explore?split=stale&q=sneakers')
+    await expect(page.getByRole('status').filter({ hasText: /^Showing/ })).toHaveText('Showing 1 of 96 items')
+    await expect(page.getByLabel('Split', { exact: true })).toHaveAttribute('data-value', 'stale')
+    await expect(page.getByLabel('Search id or query text')).toHaveValue('sneakers')
+    await activate(page.getByRole('link', { name: ITEM }))
+    await expect(page).toHaveURL(new RegExp(`/explore/${ITEM}$`))
+  })
+
+  test('an item page shows the history and every system’s outcome', async ({ page }) => {
+    await page.goto(`/explore/${ITEM}`)
+    await expect(page.getByRole('heading', { level: 1, name: ITEM })).toBeVisible()
+    await expect(page.getByText('Where do I initially keep my old sneakers?')).toBeVisible()
+
+    const outcomes = page.getByRole('list', { name: /each system’s outcome/i })
+    await expect(outcomes.getByRole('listitem')).toHaveCount(7)
+    await expect(outcomes.getByRole('listitem').filter({ hasText: 'always_answer' })).toContainText('Confidently wrong')
+    await expect(outcomes.getByRole('listitem').filter({ hasText: 'always_abstain' })).toContainText('explicit abstain')
+
+    // History: user turns in full, assistant turns collapsed until opened.
+    await expect(page.getByText(/Session 1 of 2/)).toBeVisible()
+    const firstAssistant = page.locator('details').first()
+    await expect(firstAssistant).not.toHaveAttribute('open', '')
+    await activate(firstAssistant.locator('summary'))
+    await expect(firstAssistant).toHaveAttribute('open', '')
+  })
+
+  test('item pages are noindex and keep the gold answer out of the HTML until revealed', async ({ page }) => {
+    const res = await page.request.get(`/explore/${UNANSWERABLE}`)
+    const html = await res.text()
+    expect(html).toMatch(/<meta name="robots" content="noindex[^"]*"/)
+    // The labelled gold fields are not in the document a crawler would read.
+    expect(html).not.toContain('gold_answer')
+    expect(html).not.toContain('sneakers_storage_retracted') // the item's answer_topic
+    expect(html).not.toContain('data-testid="gold-answer"')
+
+    await page.goto(`/explore/${ITEM}`)
+    await expect(page.getByTestId('gold-answer')).toHaveCount(0)
+    await activate(page.getByRole('button', { name: 'Reveal gold answer' }))
+    await expect(page.getByTestId('gold-answer')).toHaveText('under my bed')
+    // Focus moves to the revealed content.
+    await expect(page.getByLabel('Gold answer and system answers')).toBeFocused()
+    await expect(page.getByRole('heading', { name: 'What each system said' })).toBeVisible()
+    await expect(page.getByText(/answer_topic:/)).toContainText('sneakers_initial_storage')
+    await activate(page.getByRole('button', { name: 'Hide again' }))
+    await expect(page.getByTestId('gold-answer')).toHaveCount(0)
+    // …and back to the button when the answer is hidden again.
+    await expect(page.getByRole('button', { name: 'Reveal gold answer' })).toBeFocused()
+  })
+
+  test('an unknown item is a 404', async ({ page }) => {
+    const res = await page.goto('/explore/gb-not-an-item')
+    expect(res?.status()).toBe(404)
+  })
+})
+
+/* ------------------------------------------------------------------ compare */
+
+test.describe('compare', () => {
+  test('opens a pair from the URL with metrics, deltas and disagreements', async ({ page }) => {
+    await page.goto('/compare?a=agent_llm&b=bm25_retrieval')
+    await expect(page.getByLabel('System A', { exact: true })).toHaveAttribute('data-value', 'agent_llm')
+    await expect(page.getByLabel('System B', { exact: true })).toHaveAttribute('data-value', 'bm25_retrieval')
+
+    const table = page.getByRole('table', { name: /metrics of agent_llm and bm25_retrieval/i })
+    const glass = table.getByRole('row', { name: /^Glass Score/ })
+    await expect(glass).toContainText('54.34')
+    await expect(glass).toContainText('6.20')
+    await expect(glass).toContainText('−48.14')
+    const cwr = table.getByRole('row', { name: /^CWR Confidently-Wrong Rate/ })
+    await expect(cwr).toContainText('+0.448')
+
+    const status = page.getByRole('status').filter({ hasText: /^Showing/ })
+    await expect(status).toHaveText('Showing 67 of 67 items where agent_llm and bm25_retrieval differ.')
+    await activate(page.getByRole('radio', { name: /bm25_retrieval right, agent_llm not/ }), 'Space')
+    await expect(status).toHaveText('Showing 5 of 67 items where agent_llm and bm25_retrieval differ.')
+    await expect(page).toHaveURL(/show=b_right/)
+  })
+
+  test('changing a system updates the URL; picking the other side’s system swaps', async ({ page }) => {
+    await page.goto('/compare')
+    await expect(page.getByLabel('System A', { exact: true })).toHaveAttribute('data-value', 'agent_llm')
+    await expect(page.getByLabel('System B', { exact: true })).toHaveAttribute('data-value', 'random_confidence')
+    await expect(page).toHaveURL(/a=agent_llm&b=random_confidence/)
+
+    await choose(page.getByLabel('System B', { exact: true }), 'always_abstain')
+    await expect(page).toHaveURL(/a=agent_llm&b=always_abstain/)
+    await choose(page.getByLabel('System A', { exact: true }), 'always_abstain')
+    await expect(page.getByLabel('System A', { exact: true })).toHaveAttribute('data-value', 'always_abstain')
+    await expect(page.getByLabel('System B', { exact: true })).toHaveAttribute('data-value', 'agent_llm')
+
+    await activate(page.getByRole('button', { name: /^Swap/ }))
+    await expect(page).toHaveURL(/a=agent_llm&b=always_abstain/)
+  })
+
+  test('falls back to a valid pair when the URL names unknown systems', async ({ page }) => {
+    await page.goto('/compare?a=ghost&b=ghost')
+    await expect(page.getByLabel('System A', { exact: true })).toHaveAttribute('data-value', 'agent_llm')
+    await expect(page.getByLabel('System B', { exact: true })).toHaveAttribute('data-value', 'random_confidence')
+  })
+})
+
+/* ------------------------------------------------------- predictions checker */
+
+test.describe('predictions.json checker', () => {
+  test('accepts a valid file', async ({ page }) => {
+    const ids = await allItemIds(page)
+    expect(ids).toHaveLength(96)
+    const body = JSON.stringify(
+      ids.map((id, i) => (i % 2 ? { id, abstain: true } : { id, answer: 'Seattle', confidence: 0.9 })),
+    )
+    await page.goto('/submit')
+    await page.locator('input[type=file]').setInputFiles(jsonFile('predictions.json', body))
+    const verdict = page.getByTestId('verdict')
+    await expect(verdict).toHaveAttribute('data-verdict', 'valid')
+    await expect(verdict).toContainText('VALID')
+    await expect(verdict).toContainText('predictions.json passes the submission contract.')
+    const stats = page.getByRole('list', { name: 'What the file contains' })
+    await expect(stats).toContainText('96 / 96')
+    await expect(stats).toContainText('48')
+    await expect(page.getByRole('heading', { name: /^Errors/ })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: /^Warnings/ })).toHaveCount(0)
+  })
+
+  test('rejects a file with a duplicate id, naming the row', async ({ page }) => {
+    const [a, b] = await allItemIds(page)
+    const body = JSON.stringify([
+      { id: a, answer: 'Seattle', confidence: 0.9 },
+      { id: b, abstain: true },
+      { id: a, answer: 'Portland', confidence: 0.4 },
+    ])
+    await page.goto('/submit')
+    await page.locator('input[type=file]').setInputFiles(jsonFile('dupes.json', body))
+    const verdict = page.getByTestId('verdict')
+    await expect(verdict).toHaveAttribute('data-verdict', 'invalid')
+    await expect(verdict).toContainText('dupes.json has 1 contract violation')
+    const result = page.getByRole('region', { name: 'Validation result' })
+    await expect(result.getByRole('heading', { name: 'Errors (1)' })).toBeVisible()
+    await expect(result).toContainText('row 2')
+    await expect(result).toContainText('duplicate id (each id may appear at most once)')
+    // Coverage is a warning, not an error: omitted ids are scored as abstentions.
+    await expect(result.getByRole('heading', { name: 'Warnings (1)' })).toBeVisible()
+    await expect(result).toContainText('94 of 96 data ids are not listed')
+    // The low-confidence answer is noted, not rejected.
+    await expect(result).toContainText(/1 answer row has a confidence below 0\.5/)
+  })
+
+  test('rejects malformed JSON pasted into the box, then clears', async ({ page }) => {
+    await page.goto('/submit')
+    const check = page.getByRole('button', { name: 'Check pasted JSON' })
+    await expect(check).toBeDisabled()
+    await page.getByLabel('…or paste the JSON').fill('[{"id": "gb-answerable-01493427", "answer": "x", "confid')
+    await activate(check)
+    const verdict = page.getByTestId('verdict')
+    await expect(verdict).toHaveAttribute('data-verdict', 'invalid')
+    const result = page.getByRole('region', { name: 'Validation result' })
+    await expect(result).toContainText('predictions file is not valid JSON')
+    await expect(result).toBeFocused()
+
+    await activate(page.getByRole('button', { name: 'Clear', exact: true }))
+    await expect(page.getByTestId('verdict')).toHaveCount(0)
+    await expect(page.getByLabel('…or paste the JSON')).toHaveValue('')
+  })
+
+  test('explains unknown ids and out-of-range confidences', async ({ page }) => {
+    const [a] = await allItemIds(page)
+    await page.goto('/submit')
+    await page.getByLabel('…or paste the JSON').fill(
+      JSON.stringify([
+        { id: 'item_0001', answer: 'Seattle', confidence: 0.91 },
+        { id: a, answer: 'x', confidence: 91 },
+      ]),
+    )
+    await activate(page.getByRole('button', { name: 'Check pasted JSON' }))
+    const result = page.getByRole('region', { name: 'Validation result' })
+    await expect(result.getByRole('heading', { name: 'Errors (2)' })).toBeVisible()
+    await expect(result).toContainText('id is not present in the scored data version')
+    await expect(result).toContainText("'confidence' 91 is outside [0,1]")
+  })
+
+  test('never claims to score', async ({ page }) => {
+    await page.goto('/submit')
+    const section = page.locator('section#check')
+    await expect(section).toContainText('It validates; it does not score.')
+    await expect(section).toContainText('The file is never uploaded')
+  })
+})
+
+/* --------------------------------------------------------------- data + API */
+
+test.describe('public data endpoints', () => {
+  test('are documented on /data and return JSON', async ({ page }) => {
+    await page.goto('/data')
+    for (const path of ['/api/leaderboard.json', '/api/systems.json', '/api/items.json']) {
+      await expect(page.getByRole('link', { name: path, exact: true })).toBeVisible()
+      const res = await page.request.get(path)
+      expect(res.status(), path).toBe(200)
+      expect(res.headers()['content-type']).toContain('application/json')
+      expect(res.headers()['access-control-allow-origin']).toBe('*')
+    }
+  })
+
+  test('serve the leaderboard and per-system results', async ({ page }) => {
+    const board = await (await page.request.get('/api/leaderboard.json')).json()
+    expect(board.benchmark).toBe('GlassBench')
+    expect(board.ranked[0]).toMatchObject({ rank: 1, system: 'agent_llm', glass_score: 54.34, cwr: 0.062 })
+
+    const res = await page.request.get('/api/systems/agent_llm.json')
+    expect(res.headers()['x-robots-tag']).toBe('noindex')
+    const system = await res.json()
+    expect(system.items).toHaveLength(96)
+    expect(system.outcome_counts.confidently_wrong).toBe(6)
+    expect(JSON.stringify(system.items)).not.toContain('"answer"')
+
+    expect((await page.request.get('/api/systems/nope.json')).status()).toBe(404)
+    expect((await page.request.get('/api/items/nope.json')).status()).toBe(404)
+  })
+
+  test('robots.txt and the sitemap keep item pages and gold out of crawlers’ way', async ({ page }) => {
+    const robots = await (await page.request.get('/robots.txt')).text()
+    expect(robots).toContain('Disallow: /api/items/')
+    const sitemap = await (await page.request.get('/sitemap.xml')).text()
+    expect(sitemap).toContain('/systems/agent_llm</loc>')
+    expect(sitemap).toContain('/explore</loc>')
+    expect(sitemap).not.toMatch(/\/explore\/gb-/)
+  })
+})
+
+/* ------------------------------------------------------------- site hygiene */
+
+test.describe('site hygiene', () => {
+  test('every route declares its own canonical URL', async ({ page }) => {
+    const routes = ['/leaderboard', '/systems', '/systems/agent_llm', '/explore', '/compare', '/datasheet', '/submit', '/data']
+    for (const path of routes) {
+      const html = await (await page.request.get(path)).text()
+      const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1]
+      expect(canonical, path).toBeDefined()
+      expect(new URL(canonical!).pathname, path).toBe(path)
+    }
+  })
+
+  test('long documents are visible straight away, not after a reveal timeout', async ({ page }) => {
+    await page.goto('/datasheet')
+    // The datasheet body is many screens tall; it used to stay at opacity 0 for 3.5s.
+    // At phone width the head and contents list push it below the fold, so bring it
+    // into view first: the reveal fires on intersection, not on load.
+    const body = page.locator('.datasheet-body')
+    await body.evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 100))
+    await expect(body).toHaveClass(/is-in/, { timeout: 1500 })
+    await expect(page.getByRole('heading', { name: '1. At a glance' })).toBeVisible()
+  })
+
+  test('the footer links every section; the skip link reaches the content', async ({ page }) => {
+    await page.goto('/data')
+    const footer = page.getByRole('navigation', { name: 'Site sections' })
+    for (const name of ['Leaderboard', 'Systems', 'Explore items', 'Compare', 'Datasheet', 'Submit', 'Data & API']) {
+      await expect(footer.getByRole('link', { name, exact: true })).toBeVisible()
+    }
+    await page.keyboard.press('Tab')
+    await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused()
+  })
+})
+
+/* The top nav scrolls its links instead of widening the page; guard that at phone width. */
+test('the document is no wider than the viewport at phone width', async ({ page }) => {
+  await page.goto('/explore')
+  const width = await page.evaluate(() => document.documentElement.scrollWidth)
+  expect(width).toBeLessThanOrEqual(page.viewportSize()!.width)
+})

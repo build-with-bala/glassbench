@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
+test/visual/__screens__/
+test-results/
+playwright-report/
+_shot*.mjs
